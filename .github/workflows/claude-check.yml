@@ -1,0 +1,15 @@
+name: claude-check
+on: workflow_dispatch
+jobs:
+  call-claude:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the Claude API
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          curl -sS --fail-with-body https://api.anthropic.com/v1/messages \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d '{"model":"claude-sonnet-5-5","max_tokens":50,"messages":[{"role":"user","content":"Reply with: pipeline OK"}]}'
