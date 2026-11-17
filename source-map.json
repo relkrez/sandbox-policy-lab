@@ -162,7 +162,20 @@
             "kind": "tested",
             "evidence": "captures/01-policy-ls-wide-clean.txt"
           }
+        },
+        {
+          "id": "L1-S3-Rf3b9c47-1",
+          "text": "In a local sandbox, a blocked host that shares an IP address with an allowed host can still be reached.",
+          "source": {
+            "kind": "docs",
+            "path": "see upstream commit f3b9c47090031af3c486c8c871dab1045106fc60",
+            "heading": "Hostname blocking limitations",
+            "added_by": "refresh workflow, pending SME review"
+          }
         }
+      ],
+      "revised_for": [
+        "f3b9c47090031af3c486c8c871dab1045106fc60"
       ]
     },
     {
@@ -195,7 +208,60 @@
             "kind": "tested",
             "evidence": "captures/04-check-results-2026-11-16.txt"
           }
+        },
+        {
+          "id": "L1-S4-Rf3b9c47-1",
+          "text": "In local sandboxes, a blocked host that shares an IP address with an allowed host can still be reached.",
+          "source": {
+            "kind": "docs",
+            "path": "see upstream commit f3b9c47090031af3c486c8c871dab1045106fc60",
+            "heading": "Hostname blocking limitations",
+            "added_by": "refresh workflow, pending SME review"
+          }
+        },
+        {
+          "id": "L1-S4-Rf3b9c47-2",
+          "text": "Network rules match the hostname attributed to the connection, such as its TLS Server Name Indication (SNI) or HTTP Host.",
+          "source": {
+            "kind": "docs",
+            "path": "see upstream commit f3b9c47090031af3c486c8c871dab1045106fc60",
+            "heading": "Hostname blocking limitations",
+            "added_by": "refresh workflow, pending SME review"
+          }
+        },
+        {
+          "id": "L1-S4-Rf3b9c47-3",
+          "text": "On connections the proxy doesn't decrypt, the HTTP Host or :authority inside the encrypted stream isn't checked.",
+          "source": {
+            "kind": "docs",
+            "path": "see upstream commit f3b9c47090031af3c486c8c871dab1045106fc60",
+            "heading": "Hostname blocking limitations",
+            "added_by": "refresh workflow, pending SME review"
+          }
+        },
+        {
+          "id": "L1-S4-Rf3b9c47-4",
+          "text": "On cleartext HTTP connections sent through a CONNECT tunnel or without HTTP_PROXY, only the first request's Host is checked, and later requests on the same connection aren't checked. This doesn't apply to plain HTTP sent to HTTP_PROXY.",
+          "source": {
+            "kind": "docs",
+            "path": "see upstream commit f3b9c47090031af3c486c8c871dab1045106fc60",
+            "heading": "Hostname blocking limitations",
+            "added_by": "refresh workflow, pending SME review"
+          }
+        },
+        {
+          "id": "L1-S4-Rf3b9c47-5",
+          "text": "When a connection names no host, an allowed hostname the sandbox resolved to that address is used, even if another hostname resolved to the same address is blocked.",
+          "source": {
+            "kind": "docs",
+            "path": "see upstream commit f3b9c47090031af3c486c8c871dab1045106fc60",
+            "heading": "Hostname blocking limitations",
+            "added_by": "refresh workflow, pending SME review"
+          }
         }
+      ],
+      "revised_for": [
+        "f3b9c47090031af3c486c8c871dab1045106fc60"
       ]
     },
     {
