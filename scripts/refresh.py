@@ -16,6 +16,8 @@ Environment variables:
   UPSTREAM_DIR       path to a clone of docker/docs (default: _upstream)
   REFRESH_MOCK       set to 1 to skip the API and use stand-in answers,
                      for testing the plumbing only
+  GITHUB_REPOSITORY  owner/repo, set by GitHub Actions (optional, for preview links)
+  BRANCH             the pull request's branch (optional, for preview links)
 """
 
 import datetime
@@ -32,6 +34,7 @@ UPSTREAM = os.environ.get("UPSTREAM_DIR", os.path.join(ROOT, "_upstream"))
 MODEL = os.environ.get("CLAUDE_MODEL") or "claude-opus-5-5"
 MOCK = os.environ.get("REFRESH_MOCK") == "1"
 MAX_DIFF_CHARS = 60000
+TRIAGE_MAX_TOKENS = 4000
 
 LESSON_NOTES = {
     "docs/lesson-1.html": (
@@ -71,7 +74,11 @@ def fill(template, values):
 
 
 def ask_claude(prompt, max_tokens):
-    """Send one prompt to the Claude Messages API and return the reply text."""
+    """Send one prompt to the Claude Messages API.
+
+    Returns the reply text and the stop reason. A stop reason of "max_tokens"
+    means the reply was cut off before it finished.
+    """
     body = json.dumps(
         {
             "model": MODEL,
@@ -94,9 +101,11 @@ def ask_claude(prompt, max_tokens):
     except urllib.error.HTTPError as error:
         detail = error.read().decode("utf-8", "replace")
         sys.exit(f"The Claude API returned {error.code}: {detail}")
-    if reply.get("stop_reason") == "max_tokens":
+    stop_reason = reply.get("stop_reason", "")
+    if stop_reason == "max_tokens":
         print("Warning: the reply was cut off at the token limit.")
-    return "".join(part.get("text", "") for part in reply.get("content", []))
+    text = "".join(part.get("text", "") for part in reply.get("content", []))
+    return text, stop_reason
 
 
 # --- Stand-in answers, used only when REFRESH_MOCK=1 -------------------------
@@ -175,6 +184,26 @@ def check_replacement(section_id, old_html, new_html):
     return None
 
 
+def parse_json_reply(reply):
+    """Read a JSON object from a model reply, or return None.
+
+    Accepts a reply wrapped in a code fence, surrounded by other text, or with
+    line breaks inside text values, which strict JSON forbids.
+    """
+    text = reply.strip()
+    fenced = re.search(r"```(?:json)?\s*(.*?)```", text, re.S)
+    if fenced:
+        text = fenced.group(1)
+    start = text.find("{")
+    if start == -1:
+        return None
+    try:
+        value, _ = json.JSONDecoder(strict=False).raw_decode(text[start:])
+    except ValueError:
+        return None
+    return value if isinstance(value, dict) else None
+
+
 def tagged(reply, tag):
     match = re.search(r"<%s>\s*(.*?)\s*</%s>" % (tag, tag), reply, re.S)
     return match.group(1) if match else ""
@@ -192,18 +221,25 @@ def triage(commit_meta, diff, rubric, source_map_text):
             "DIFF": diff,
         },
     )
-    reply = mock_triage(diff) if MOCK else ask_claude(prompt, 2000)
-    start, end = reply.find("{"), reply.rfind("}")
-    try:
-        return json.loads(reply[start : end + 1])
-    except ValueError:
-        return {
-            "material": True,
-            "rule": "unreadable reply",
-            "reasoning": "The triage reply wasn't valid JSON, so this change needs a manual review. Reply: "
-            + reply[:500],
-            "affected": [],
-        }
+    if MOCK:
+        reply, stop_reason = mock_triage(diff), "end_turn"
+    else:
+        reply, stop_reason = ask_claude(prompt, TRIAGE_MAX_TOKENS)
+    result = parse_json_reply(reply)
+    if result is not None:
+        return result
+    cause = (
+        "The reply was cut off at the token limit before it finished."
+        if stop_reason == "max_tokens"
+        else "The reply wasn't readable as JSON."
+    )
+    return {
+        "material": True,
+        "rule": "unreadable reply",
+        "reasoning": cause + " This change needs a manual review. The full reply follows.",
+        "raw_reply": reply,
+        "affected": [],
+    }
 
 
 def redraft(item, commit_meta, diff, rules):
@@ -222,7 +258,15 @@ def redraft(item, commit_meta, diff, rules):
             "SECTION_HTML": old_html,
         },
     )
-    reply = mock_redraft(old_html) if MOCK else ask_claude(prompt, 12000)
+    if MOCK:
+        reply = mock_redraft(old_html)
+    else:
+        reply, stop_reason = ask_claude(prompt, 12000)
+        if stop_reason == "max_tokens":
+            return {
+                "status": "rejected",
+                "detail": "The draft was cut off at the token limit, so it wasn't applied. The section is unchanged.",
+            }
     new_html = tagged(reply, "replacement")
     problem = check_replacement(section_id, old_html, new_html)
     if problem:
@@ -232,7 +276,7 @@ def redraft(item, commit_meta, diff, rules):
         }
     put_section(lesson, section_id, new_html)
     try:
-        new_claims = json.loads(tagged(reply, "new_claims") or "[]")
+        new_claims = json.loads(tagged(reply, "new_claims") or "[]", strict=False)
     except ValueError:
         new_claims = []
     return {"status": "applied", "detail": tagged(reply, "summary"), "new_claims": new_claims}
@@ -252,6 +296,8 @@ def main():
     source_map_text = json.dumps(source_map["sections"], indent=1)
     watched = source_map["upstream"]["watched_paths"]
     known = {(s["lesson"], s["section"]) for s in source_map["sections"]}
+    repo, branch = os.environ.get("GITHUB_REPOSITORY"), os.environ.get("BRANCH")
+    changed_lessons = []
     rubric = read("review/triage-rubric.md")
     rules = read("review/writing-rules.md")
 
@@ -281,6 +327,8 @@ def main():
             str(result.get("reasoning", "")),
             "",
         ]
+        if result.get("raw_reply"):
+            log += ["<details><summary>Full reply from Claude</summary>", "", "```", result["raw_reply"], "```", "", "</details>", ""]
         if not material:
             continue
         material_count += 1
@@ -301,6 +349,8 @@ def main():
                 "",
             ]
             if outcome["status"] == "applied":
+                if item["lesson"] not in changed_lessons:
+                    changed_lessons.append(item["lesson"])
                 for section in source_map["sections"]:
                     if (section["lesson"], section["section"]) == (item["lesson"], item["section"]):
                         section.setdefault("revised_for", []).append(sha)
@@ -321,6 +371,19 @@ def main():
     write("source-map.json", json.dumps(source_map, indent=2) + "\n")
     short = "-".join(c[:7] for c in commits)
     log_path = f"refresh-log/{today}-{short}.md"
+    if changed_lessons:
+        log += ["## Preview the changed lessons", ""]
+        if repo and branch:
+            log += [
+                "These links render the lessons from this pull request's branch, using htmlpreview.github.io, a third-party viewer. Compare each with the published version.",
+                "",
+            ]
+            for lesson in changed_lessons:
+                url = f"https://github.com/{repo}/blob/{branch}/{lesson}"
+                log.append(f"- [{lesson}, as redrafted](https://htmlpreview.github.io/?{url})")
+            log.append("")
+        else:
+            log += ["Download the changed files from the **Files changed** tab and open them in a browser.", ""]
     log += ["---", "", "Review this pull request against `review/sme-checklist.md` before merging."]
     write(log_path, "\n".join(log) + "\n")
 
