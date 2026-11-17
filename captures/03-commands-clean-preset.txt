@@ -1,0 +1,167 @@
+C:\Users\David>sbx policy reset
+
+  Stopped daemon
+  Reset policies
+
+  Choose the network policy for sandboxes
+    1. Open   all network traffic allowed, no restrictions
+    2. Balanced   default deny, with common dev sites allowed
+    3. Locked Down   all network traffic blocked unless you allow it
+  Choice [1-3, default 2]: 2
+
+  Set network policy Balanced
+    try: sbx policy reset
+     or: sbx policy allow network HOST
+     or: sbx policy deny network HOST
+     or: sbx policy rm network --resource HOST
+
+
+C:\Users\David>sbx policy ls
+
+  POLICY                                 SOURCE   APPLIES TO     SUMMARY
+  c160c65c-918d-463e-8bdb-db67fc0f19b2   kit      sandbox:day3   network: 8 allow
+  default-deny-all                       local    all            network: deny when no rule decides
+  local-policy                           local    all            network: 195 allow; filesystem read: 1 allow; filesystem write: 1 allow
+
+
+C:\Users\David>sbx policy deny network default-cloud-infrastructure
+
+  Added rule d8fb9081-869c-4fef-af5a-ec3049c0baf8 to policy local (scope: global): default-cloud-infrastructure [tcp,udp]
+
+
+C:\Users\David>sbx policy check network s3.amazonaws.com:443
+
+    Allowed:     s3.amazonaws.com:443
+    Governance:  Local policy only
+    Context:     global
+    Rule:        default-cloud-infrastructure
+
+
+C:\Users\David>sbx policy check network default-cloud-infrastructure
+
+    Denied:      default-cloud-infrastructure:443
+    Governance:  Local policy only
+    Context:     global
+    Reason:      denied by local rule rule "local:d8fb9081-869c-4fef-af5a-ec3049c0baf8"
+
+
+C:\Users\David>sbx policy rm network --resource default-cloud-infrastructure
+
+  Remove network rules from global (resources=default-cloud-infrastructure)? (y/N) y
+
+  Removed rule from policy local: resources=default-cloud-infrastructure
+
+
+C:\Users\David>sbx policy rm network --id default-cloud-infrastructure
+
+  Remove network rules from global (id=default-cloud-infrastructure)? (y/N) y
+
+  Removed rule from policy local: id=default-cloud-infrastructure
+
+
+C:\Users\David>sbx policy check network cdn.playwright.dev:443
+
+    Denied:      cdn.playwright.dev:443
+    Governance:  Local policy only
+    Context:     global
+    Reason:      no matching allow rule (default deny)
+
+
+C:\Users\David>sbx policy allow network cdn.playwright.dev
+
+  Added rule 2d5f22e6-569f-4b9d-9bb5-9818d95d6ce7 to policy local (scope: global): cdn.playwright.dev [tcp]
+
+
+C:\Users\David>sbx policy check network cdn.playwright.dev:443
+
+    Allowed:     cdn.playwright.dev:443
+    Governance:  Local policy only
+    Context:     global
+    Rule:        2d5f22e6-569f-4b9d-9bb5-9818d95d6ce7
+
+
+C:\Users\David>sbx policy deny network sourceforge.net
+
+  Added rule 53ec821c-272f-45ab-b2af-c00732e4adf2 to policy local (scope: global): sourceforge.net [tcp,udp]
+
+
+C:\Users\David>sbx policy check network sourceforge.net:443
+
+    Denied:      sourceforge.net:443
+    Governance:  Local policy only
+    Context:     global
+    Reason:      denied by local rule rule "local:53ec821c-272f-45ab-b2af-c00732e4adf2"
+
+
+C:\Users\David>sbx policy rm network --help
+
+  Description:
+    Remove a network rule by rule ID, resource, or both.
+
+    --id takes the RULE_ID value shown by "sbx policy ls --wide" and
+    "sbx policy inspect" — the rule's identifier, not its name. Passing a rule
+    name fails with an error that names the actual rule ID and, for removable
+    rules, the exact corrected command.
+
+    The rule is removed from the global policy by default. Use --sandbox to
+    remove from policy "local" scoped to a single sandbox instead.
+
+    Use "sbx policy ls --wide" to see active rule IDs and resources, or
+    "sbx policy ls --json" for the filtered rules; network values are printed in
+    the form the CLI accepts back.
+
+    Use --method to add an HTTP rule. --method accepts comma-separated HTTP
+    methods or ANY; --path defaults to /**. Repeat --query name=value to require
+    query parameters.
+
+    HTTP paths, query parameter names, and query values match without regard to
+    ASCII letter case. For example, /API/** matches /api/items, and Tag=PROD
+    matches tag=prod.
+
+    With --cloud:
+    Remove a cloud network rule by pattern.
+
+    Cloud rules have no IDs: --resource removes the pattern from both the allow
+    and deny lists, and the output names each list it was removed from. The rule
+    leaves the account policy by default; use --sandbox to scope the removal to one
+    sandbox. Use "sbx --cloud policy ls" to see the current rules.
+
+  Usage:
+    sbx policy rm network [--sandbox SANDBOX] [flags]
+
+  Examples:
+    # List rules to find the ID or resource to remove
+    sbx policy ls --wide
+
+    # Remove a global rule by resource
+    sbx policy rm network --resource api.example.com
+
+    # Remove a global rule by ID
+    sbx policy rm network --id 2d3c1f0e-4a73-4e05-bc9d-f2f9a4b50d67
+
+    # Remove a sandbox-scoped rule by resource
+    sbx policy rm network --sandbox my-sandbox --resource api.example.com
+
+    # Remove an HTTP rule by resource, method, and path
+    sbx policy rm network --resource api.example.com --method GET --path '/v1/**'
+
+    # Remove a cloud rule by pattern, from the allow or deny list it is in
+    sbx --cloud policy rm network --resource api.example.com
+
+    # Remove a pattern from one cloud sandbox's rules
+    sbx --cloud policy rm network --sandbox my-sandbox --resource api.example.com
+
+  Flags:
+    -f, --force               Skip confirmation prompts
+    -h, --help                help for network
+        --id string           Remove by rule ID
+        --method strings      Restrict the rule to these HTTP methods (comma-separated); use ANY to match all methods
+        --path string         Restrict the rule to this HTTP path glob (e.g. /repos/**); defaults to /**
+        --query stringArray   Require an HTTP query parameter (name=value pattern); repeatable
+        --resource string     Remove by resource value(s), comma-separated
+        --sandbox string      Scope the removal to a specific sandbox (default: global policy)
+
+  Global Flags:
+        --cloud      Dispatch to Docker Cloud Sandboxes API instead of local sandboxd (supported by a growing set of verbs — run 'sbx --cloud --help' for the current list)
+    -D, --debug      Enable debug logging
+        --no-input   Never prompt; commands that need an answer fail with the command to run instead

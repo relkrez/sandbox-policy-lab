@@ -1,0 +1,393 @@
+{
+  "about": "Every claim a lesson makes, and where it comes from. A claim's source is either a heading in Docker's docs or a result tested on a real machine. The refresh workflow uses this file to decide whether a docs change affects the course.",
+  "upstream": {
+    "repo": "docker/docs",
+    "snapshot_commit": "01932368c8957d8b033a32026da484880a3a1489",
+    "snapshot_date": "2026-11-04",
+    "watched_paths": [
+      "content/manuals/ai/governance/local/_index.md",
+      "content/manuals/ai/governance/local/inspect.md",
+      "content/manuals/ai/governance/local/network-rules.md",
+      "content/manuals/ai/governance/local/test-monitor.md",
+      "content/manuals/ai/governance/reference/network-rules.md"
+    ]
+  },
+  "tested_on": "sbx v0.54.0, Windows 11, Command Prompt, 2026-11-16",
+  "sections": [
+    {
+      "lesson": "docs/lesson-1.html",
+      "section": "s1",
+      "heading": "A sandbox's rules decide which destinations an agent can reach",
+      "claims": [
+        {
+          "id": "L1-S1-1",
+          "text": "A request is allowed when any rule allows it, a deny rule from any source overrides an allow rule, and a request no rule decides is blocked by the fallback.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/_index.md",
+            "heading": "How rules combine"
+          }
+        },
+        {
+          "id": "L1-S1-2",
+          "text": "Under the Balanced preset, a request that matches no rule is blocked and the sandbox asks for approval.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/_index.md",
+            "heading": "Start from a preset"
+          }
+        },
+        {
+          "id": "L1-S1-3",
+          "text": "A destination is a host and a port. pypi.org:443 is allowed and pypi.org:80 is denied.",
+          "source": {
+            "kind": "tested",
+            "evidence": "captures/04-check-results-2026-11-16.txt"
+          }
+        },
+        {
+          "id": "L1-S1-4",
+          "text": "A deny rule for api.github.com blocks it even though a group allows **.github.com.",
+          "source": {
+            "kind": "tested",
+            "evidence": "captures/04-check-results-2026-11-16.txt"
+          }
+        }
+      ]
+    },
+    {
+      "lesson": "docs/lesson-1.html",
+      "section": "s2",
+      "heading": "A preset and a kit supply the rules a sandbox starts with",
+      "claims": [
+        {
+          "id": "L1-S2-1",
+          "text": "There are three presets: Open, Balanced, and Locked Down. The preset is chosen the first time you run a sandbox and applies to every sandbox on the machine.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/_index.md",
+            "heading": "Start from a preset"
+          }
+        },
+        {
+          "id": "L1-S2-2",
+          "text": "A machine on the Balanced preset with one Claude Code sandbox lists three policies: local-policy, default-deny-all, and a kit policy.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/inspect.md",
+            "heading": "List the policies that apply"
+          }
+        },
+        {
+          "id": "L1-S2-3",
+          "text": "The fallback blocks any request no other rule decides, and it never overrides an allow rule.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/inspect.md",
+            "heading": "List the policies that apply"
+          }
+        },
+        {
+          "id": "L1-S2-4",
+          "text": "A kit brings its own allow rules. They apply only to sandboxes that use the kit, and they can't be edited.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/_index.md",
+            "heading": "Use kits that add rules"
+          }
+        },
+        {
+          "id": "L1-S2-5",
+          "text": "The Balanced preset holds 195 network allow rules in six rule IDs, and the Claude Code kit policy holds eight.",
+          "source": {
+            "kind": "tested",
+            "evidence": "captures/01-policy-ls-wide-clean.txt"
+          }
+        },
+        {
+          "id": "L1-S2-6",
+          "text": "Policies can also hold filesystem rules, which control the host folders a sandbox can mount.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/inspect.md",
+            "heading": "List filesystem mount rules"
+          }
+        }
+      ]
+    },
+    {
+      "lesson": "docs/lesson-1.html",
+      "section": "s3",
+      "heading": "Every rule you add or remove changes what the team can do",
+      "claims": [
+        {
+          "id": "L1-S3-1",
+          "text": "Removing a rule group blocks every destination that only that group allowed.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/network-rules.md",
+            "heading": "Remove a rule"
+          }
+        },
+        {
+          "id": "L1-S3-2",
+          "text": "Allowing a host makes that one destination reachable again.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/network-rules.md",
+            "heading": "Allow or block a destination"
+          }
+        },
+        {
+          "id": "L1-S3-3",
+          "text": "Denying a host blocks that destination, even when a group or a kit allows it.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/network-rules.md",
+            "heading": "Allow or block a destination"
+          }
+        },
+        {
+          "id": "L1-S3-4",
+          "text": "The kit policy stays in place whatever you remove from the local policy. With default-ai-services removed, api.anthropic.com is still allowed in a sandbox that uses the Claude Code kit.",
+          "source": {
+            "kind": "tested",
+            "evidence": "captures/04-check-results-2026-11-16.txt"
+          }
+        },
+        {
+          "id": "L1-S3-5",
+          "text": "The Cloud infrastructure group also contains cdn.playwright.dev and other hosts that aren't cloud providers.",
+          "source": {
+            "kind": "tested",
+            "evidence": "captures/01-policy-ls-wide-clean.txt"
+          }
+        }
+      ]
+    },
+    {
+      "lesson": "docs/lesson-1.html",
+      "section": "s4",
+      "heading": "A wildcard allows more than it names",
+      "claims": [
+        {
+          "id": "L1-S4-1",
+          "text": "A one-star wildcard matches exactly one subdomain level and doesn't match the bare domain.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/reference/network-rules.md",
+            "heading": "Hostname patterns"
+          }
+        },
+        {
+          "id": "L1-S4-2",
+          "text": "A two-star wildcard matches subdomains at any depth.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/reference/network-rules.md",
+            "heading": "Hostname patterns"
+          }
+        },
+        {
+          "id": "L1-S4-3",
+          "text": "A two-star wildcard also matches the bare domain: **.amazonaws.com allows amazonaws.com.",
+          "source": {
+            "kind": "tested",
+            "evidence": "captures/04-check-results-2026-11-16.txt"
+          }
+        }
+      ]
+    },
+    {
+      "lesson": "docs/lesson-1.html",
+      "section": "assess",
+      "heading": "Write your reply to Priya",
+      "claims": [
+        {
+          "id": "L1-A-1",
+          "text": "The model reply applies the claims of sections 2 to 4 to the scenario team. It has no source of its own.",
+          "source": {
+            "kind": "derived",
+            "from": [
+              "L1-S2-4",
+              "L1-S3-1",
+              "L1-S3-2",
+              "L1-S3-3",
+              "L1-S3-5",
+              "L1-S4-2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "lesson": "docs/lesson-2.html",
+      "section": "s1",
+      "heading": "The CLI documents itself, so ask it before you guess",
+      "claims": [
+        {
+          "id": "L2-S1-1",
+          "text": "The help output for sbx policy and sbx policy rm network, as shown.",
+          "source": {
+            "kind": "tested",
+            "evidence": "captures/05-help-output-2026-11-16.txt"
+          }
+        }
+      ]
+    },
+    {
+      "lesson": "docs/lesson-2.html",
+      "section": "s2",
+      "heading": "Listing the policies shows you who set each rule",
+      "claims": [
+        {
+          "id": "L2-S2-1",
+          "text": "sbx policy ls shows one row for each policy, with its source, what it applies to, and a summary.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/inspect.md",
+            "heading": "List the policies that apply"
+          }
+        },
+        {
+          "id": "L2-S2-2",
+          "text": "sbx policy ls SANDBOX shows the combined policy for one sandbox.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/inspect.md",
+            "heading": "List the policies for one sandbox"
+          }
+        },
+        {
+          "id": "L2-S2-3",
+          "text": "The listing output, as shown.",
+          "source": {
+            "kind": "tested",
+            "evidence": "captures/03-commands-clean-preset.txt"
+          }
+        }
+      ]
+    },
+    {
+      "lesson": "docs/lesson-2.html",
+      "section": "s3",
+      "heading": "Inspecting a group shows everything you're about to remove",
+      "claims": [
+        {
+          "id": "L2-S3-1",
+          "text": "sbx policy inspect shows a policy's rules or one rule's details.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/inspect.md",
+            "heading": "Show rule details"
+          }
+        },
+        {
+          "id": "L2-S3-2",
+          "text": "The inspect output for local-policy and default-cloud-infrastructure, as shown.",
+          "source": {
+            "kind": "tested",
+            "evidence": "captures/02-commands-with-two-added-rules.txt"
+          }
+        }
+      ]
+    },
+    {
+      "lesson": "docs/lesson-2.html",
+      "section": "s4",
+      "heading": "Each change takes effect at once, so check after each one",
+      "claims": [
+        {
+          "id": "L2-S4-1",
+          "text": "sbx policy check network reports whether a destination is allowed, and names the deciding rule or reason.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/test-monitor.md",
+            "heading": "Check whether a destination is allowed"
+          }
+        },
+        {
+          "id": "L2-S4-2",
+          "text": "sbx policy allow network and sbx policy deny network add a rule for a host.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/network-rules.md",
+            "heading": "Allow or block a destination"
+          }
+        },
+        {
+          "id": "L2-S4-3",
+          "text": "sbx policy rm network removes a rule by ID or by resource, after a confirmation prompt.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/network-rules.md",
+            "heading": "Remove a rule"
+          }
+        },
+        {
+          "id": "L2-S4-4",
+          "text": "Every command output in this section, as shown.",
+          "source": {
+            "kind": "tested",
+            "evidence": "captures/03-commands-clean-preset.txt"
+          }
+        }
+      ]
+    },
+    {
+      "lesson": "docs/lesson-2.html",
+      "section": "s5",
+      "heading": "A command can succeed and still do the wrong thing",
+      "claims": [
+        {
+          "id": "L2-S5-1",
+          "text": "sbx policy deny network with a rule ID in place of a host adds a deny rule for a host of that name and leaves the group in place.",
+          "source": {
+            "kind": "tested",
+            "evidence": "captures/03-commands-clean-preset.txt"
+          }
+        },
+        {
+          "id": "L2-S5-2",
+          "text": "Allowing a host that's already covered prints 'Already covered' and changes nothing.",
+          "source": {
+            "kind": "tested",
+            "evidence": "captures/02-commands-with-two-added-rules.txt"
+          }
+        }
+      ]
+    },
+    {
+      "lesson": "docs/lesson-2.html",
+      "section": "assess",
+      "heading": "Prove the policy matches your decision",
+      "claims": [
+        {
+          "id": "L2-A-1",
+          "text": "A denied check exits with status 1, so the command can be used in a script.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/test-monitor.md",
+            "heading": "Check whether a destination is allowed"
+          }
+        }
+      ]
+    },
+    {
+      "lesson": "docs/lesson-2.html",
+      "section": "cleanup",
+      "heading": "Put the machine back",
+      "claims": [
+        {
+          "id": "L2-C-1",
+          "text": "sbx policy reset deletes every local rule, stops running sandboxes, and asks for a preset.",
+          "source": {
+            "kind": "docs",
+            "path": "content/manuals/ai/governance/local/network-rules.md",
+            "heading": "Reset local policy"
+          }
+        }
+      ]
+    }
+  ]
+}

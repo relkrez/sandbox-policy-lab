@@ -1,0 +1,50 @@
+name: Refresh course from docs changes
+
+# Run by hand from the Actions tab. Give it one or more docker/docs commit IDs.
+on:
+  workflow_dispatch:
+    inputs:
+      commits:
+        description: "docker/docs commit IDs to review, oldest first, separated by spaces"
+        required: true
+        default: "66590909f5a2f8b74ff034bcd36406788e5d9ea9 f3b9c47090031af3c486c8c871dab1045106fc60"
+
+# The job may push a branch and open a pull request. It can't merge.
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Get this repository: the lessons, the source map, the prompts.
+      - name: Check out the course
+        uses: actions/checkout@v4
+
+      # 2. Get the history of Docker's docs, without downloading every file.
+      - name: Get Docker's docs history
+        run: git clone --filter=blob:none --no-checkout https://github.com/docker/docs.git _upstream
+
+      # 3. Triage each commit and redraft the affected lesson sections.
+      - name: Triage and redraft
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL }}
+          COMMITS: ${{ inputs.commits }}
+        run: python3 scripts/refresh.py
+
+      # 4. Put the result on a new branch and open a pull request for SME review.
+      - name: Open a pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: refresh/run-${{ github.run_number }}
+          BASE: ${{ github.event.repository.default_branch }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add docs source-map.json refresh-log
+          git commit -m "Refresh course from docs changes, run ${{ github.run_number }}"
+          git push origin "$BRANCH"
+          gh pr create --base "$BASE" --head "$BRANCH" --title "$(cat _pr-title.txt)" --body-file _pr-body.md

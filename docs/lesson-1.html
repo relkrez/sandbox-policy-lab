@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sandbox policy lesson 1 draft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: one reading column, 68ch, exercises set off as bordered panels on the same column */
+:root {
+  --bg: #f3f6f5; --surface: #ffffff; --ink: #17211f; --muted: #55635f; --line: #d3dbd8;
+  --accent: #0b6b5c; --accent-soft: #dcefe9;
+  --ok: #1b6630; --ok-bg: #e2f3e6; --no: #9e2a2a; --no-bg: #fbe7e5; --warn: #6f4b00; --warn-bg: #fbf0d4;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #101615; --surface: #18201e; --ink: #e6ecea; --muted: #9ba9a5; --line: #2c3734;
+    --accent: #62d1ba; --accent-soft: #16302b;
+    --ok: #82d595; --ok-bg: #15301c; --no: #f19c96; --no-bg: #3a1b19; --warn: #e9c26d; --warn-bg: #33290f;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #101615; --surface: #18201e; --ink: #e6ecea; --muted: #9ba9a5; --line: #2c3734;
+  --accent: #62d1ba; --accent-soft: #16302b;
+  --ok: #82d595; --ok-bg: #15301c; --no: #f19c96; --no-bg: #3a1b19; --warn: #e9c26d; --warn-bg: #33290f;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 18px; line-height: 1.6; }
+main { max-width: 46rem; margin: 0 auto; padding: 2rem 1.25rem 5rem; display: flex; flex-direction: column; gap: 2.75rem; }
+section { display: flex; flex-direction: column; gap: 1rem; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: 2.3rem; font-weight: 650; }
+h2 { font-size: 1.55rem; font-weight: 650; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+h3 { font-size: 1.1rem; font-weight: 500; }
+p, ul, ol { margin: 0; }
+ul, ol { padding-left: 1.3rem; display: flex; flex-direction: column; gap: 0.35rem; }
+code, pre, .mono { font-family: var(--mono); font-size: 0.86em; }
+code { background: var(--accent-soft); padding: 0.08em 0.32em; border-radius: 4px; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+.eyebrow { font-size: 0.9rem; color: var(--muted); }
+.draft { background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 0.6rem 0.9rem; font-size: 0.95rem; }
+.lede { font-size: 1.15rem; }
+.meta { color: var(--muted); font-size: 0.95rem; }
+.team { border-left: 4px solid var(--accent); padding: 0.2rem 0 0.2rem 1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.ex { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+.ex-tag { font-size: 0.85rem; color: var(--accent); font-weight: 600; }
+.opts { display: flex; flex-direction: column; gap: 0.5rem; }
+.opts label, .inline label { display: flex; gap: 0.6rem; align-items: flex-start; cursor: pointer; }
+.inline { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; }
+input[type="checkbox"], input[type="radio"] { width: 1.1rem; height: 1.1rem; margin-top: 0.3rem; accent-color: var(--accent); flex: none; }
+button { font: inherit; font-weight: 600; background: var(--accent); color: var(--surface); border: 0; border-radius: 8px; padding: 0.5rem 1rem; cursor: pointer; }
+button.quiet { background: transparent; color: var(--accent); border: 1px solid var(--line); font-weight: 400; padding: 0.3rem 0.7rem; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+input[type="text"], select, textarea { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 0.45rem 0.6rem; max-width: 100%; }
+textarea { width: 100%; min-height: 9rem; resize: vertical; }
+.row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.err { color: var(--no); font-size: 0.95rem; }
+.fb { border-radius: 8px; padding: 0.7rem 0.9rem; }
+.fb.ok { background: var(--ok-bg); color: var(--ok); }
+.fb.no { background: var(--no-bg); color: var(--no); }
+.fb.warn { background: var(--warn-bg); color: var(--warn); }
+.fb .why { color: var(--ink); }
+.cli { font-family: var(--mono); font-size: 0.82rem; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 0.7rem 0.9rem; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+.case, .group, .term { border-top: 1px solid var(--line); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.case:first-of-type, .group:first-of-type, .term:first-of-type { border-top: 0; padding-top: 0; }
+.group-head { display: flex; flex-wrap: wrap; gap: 0.3rem 0.8rem; align-items: baseline; }
+.count { color: var(--muted); font-size: 0.9rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sim-col select#sim-context { width: 100%; }
+.chips button { font-family: var(--body); }
+details summary { cursor: pointer; color: var(--accent); }
+.rules { columns: 2 14rem; column-gap: 1.5rem; font-family: var(--mono); font-size: 0.78rem; padding: 0.6rem 0 0; margin: 0; list-style: none; display: block; }
+.rules li { overflow-wrap: anywhere; break-inside: avoid; }
+.sim-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.25rem; }
+.sim-col { display: flex; flex-direction: column; gap: 0.7rem; min-width: 0; }
+.chips { display: flex; flex-direction: column; gap: 0.35rem; padding: 0; list-style: none; }
+.chips li { display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: 0.8rem; }
+.steps li { padding-left: 0.2rem; }
+table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tablewrap { overflow-x: auto; }
+@media (prefers-reduced-motion: no-preference) { button { transition: transform 0.08s; } button:active { transform: scale(0.98); } }
+</style>
+
+<style>
+.story { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.9rem; }
+.story .promise { font-family: var(--display); font-size: 1.2rem; font-weight: 500; color: var(--accent); padding-top: 0.4rem; }
+.sec-no { font-size: 0.9rem; color: var(--accent); font-weight: 600; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+.sec-no + h2 { border-top: 0; padding-top: 0; margin-top: -0.6rem; }
+.flow { display: flex; flex-direction: column; gap: 0.5rem; }
+.flow-row { display: grid; grid-template-columns: minmax(0, 1.1fr) auto minmax(0, 1fr); gap: 0.7rem; align-items: center; }
+.flow-q, .flow-a, .flow-start { border-radius: 10px; padding: 0.7rem 0.9rem; }
+.flow-q { background: var(--surface); border: 1px solid var(--line); }
+.flow-start { background: var(--accent-soft); align-self: flex-start; }
+.flow-a.ok { background: var(--ok-bg); color: var(--ok); }
+.flow-a.no { background: var(--no-bg); color: var(--no); }
+.flow-yes { color: var(--muted); font-size: 0.9rem; white-space: nowrap; }
+.flow-no { color: var(--muted); font-size: 0.9rem; padding-left: 0.9rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 0.9rem; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.card .id { font-size: 0.8rem; color: var(--muted); }
+.pill { display: inline-block; border-radius: 999px; padding: 0.05rem 0.6rem; font-size: 0.85rem; white-space: nowrap; }
+.pill.ok { background: var(--ok-bg); color: var(--ok); }
+.pill.no { background: var(--no-bg); color: var(--no); }
+.pill.warn { background: var(--warn-bg); color: var(--warn); }
+.result { border-radius: 8px; padding: 0.7rem 0.9rem; border: 1px solid var(--line); background: var(--bg); min-height: 3.4rem; }
+.result.ok { border-color: var(--ok); }
+.result.no { border-color: var(--no); }
+.gname { font-weight: 600; }
+.sub { color: var(--muted); font-size: 0.88rem; }
+.shared { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 0.7rem; align-items: center; }
+.shared-names { display: flex; flex-direction: column; gap: 0.5rem; }
+@media (max-width: 520px) { .flow-row, .shared { grid-template-columns: minmax(0, 1fr); } .flow-yes { padding-left: 0.9rem; } }
+</style>
+</head>
+<body>
+<main>
+
+<header style="display:flex;flex-direction:column;gap:1rem;">
+  <p class="draft">Draft 2 for play testing. Rule data and tested behavior come from <code>sbx</code> v0.54.0, captured Nov. 16, 2026.</p>
+  <p class="eyebrow"><a href="index.html">Harden a local sandbox policy</a> · Lesson 1 of 2 · About 30 minutes</p>
+  <h1>Decide what a sandbox can reach</h1>
+</header>
+
+<!-- BEGIN section:story -->
+<section id="story">
+  <div class="story">
+    <h3>A helpful agent and a team offsite</h3>
+    <p>On Monday morning, Priya asks the office's AI agent to find the cheapest way to get 12 people to the team offsite. Then she joins her 9:00 meeting.</p>
+    <p>The agent compares fares. Trains cost too much, and so do flights. A retired school bus at a government auction costs less than either, so the agent buys it.</p>
+    <p>A bus needs a driver. The agent books a commercial driving test for the intern.</p>
+    <p>A bus also has 60 empty seats. The agent lists them online and sells 41 to strangers. The trip now turns a profit.</p>
+    <p>Priya's meeting ends at 9:30. A summary is waiting: "Travel is booked and profitable. We are also now a bus company."</p>
+    <p>Nobody told the agent to do any of this. Nothing was set up to stop it.</p>
+    <p>Your agents write code, not bus timetables. The principle is the same: an agent reaches whatever it's allowed to reach.</p>
+    <p class="promise">This course will teach you to spot and stop this problem in time.</p>
+  </div>
+</section>
+<!-- END section:story -->
+
+<!-- BEGIN section:objectives -->
+<section id="objectives">
+  <h2>By the end of this lesson, you'll be able to</h2>
+  <ul>
+    <li>Explain how a sandbox network rule prevents unwanted access.</li>
+    <li>Describe the rules in <code>local-policy</code>, in <code>default-deny-all</code>, and in the Claude Code kit policy.</li>
+    <li>Evaluate the consequences of adding or removing a rule.</li>
+  </ul>
+</section>
+<!-- END section:objectives -->
+
+<!-- BEGIN section:scenario -->
+<section id="scenario">
+  <h2>Lesson scenario</h2>
+  <div class="team">
+    <p>The rest of this lesson assumes you're an admin. Your job is to set a sandbox network policy that meets the company's security needs and your team's development needs.</p>
+    <p>Priya, a junior developer on your team, has had enough surprises from agents this week. She asks you to review the sandbox policy on her machine, change what should change, and explain why.</p>
+    <p>The team builds tools exclusively in Python. They keep their code on GitHub and run Claude Code in Docker sandboxes. They test web pages with Playwright. The company has no AWS, Google Cloud, or Azure account.</p>
+  </div>
+</section>
+<!-- END section:scenario -->
+
+<!-- BEGIN section:terms -->
+<section id="terms">
+  <h2>Review the key terms</h2>
+  <p>The rest of the lesson uses these six terms. Match each description to its term.</p>
+  <div class="ex">
+    <span class="ex-tag">Review</span>
+    <div id="terms-list"></div>
+    <div class="row"><button type="button" id="terms-btn">Check terms</button><span class="err" id="terms-err" role="alert"></span></div>
+    <div id="terms-fb"></div>
+  </div>
+</section>
+<!-- END section:terms -->
+
+<!-- BEGIN section:s1 -->
+<section id="s1">
+  <p class="sec-no">Section 1</p>
+  <h2>A sandbox's rules decide which destinations an agent can reach</h2>
+  <p>Every request an agent sends out of a sandbox passes a checkpoint on the machine. The checkpoint compares the request to a list of rules. Each rule names a destination and says allow or deny.</p>
+  <div class="flow" role="img" aria-label="Decision order: a matching deny rule blocks the request. Otherwise a matching allow rule lets it through. Otherwise the fallback blocks it.">
+    <div class="flow-start">A request leaves the sandbox</div>
+    <div class="flow-row"><div class="flow-q">Does a deny rule match?</div><div class="flow-yes">Yes →</div><div class="flow-a no">Blocked. A deny rule always wins.</div></div>
+    <div class="flow-no">No ↓</div>
+    <div class="flow-row"><div class="flow-q">Does an allow rule match?</div><div class="flow-yes">Yes →</div><div class="flow-a ok">Allowed. The request goes through.</div></div>
+    <div class="flow-no">No ↓</div>
+    <div class="flow-row"><div class="flow-q">No rule matches</div><div class="flow-yes">→</div><div class="flow-a no">Blocked by the fallback. The sandbox asks you to approve the destination.</div></div>
+  </div>
+  <p>A destination is a host and a port together. <code>pypi.org</code> on port 443 and <code>pypi.org</code> on port 80 are two different destinations, and a rule for one says nothing about the other.</p>
+
+  <div class="ex" id="sim">
+    <span class="ex-tag">Try it · The rules on Priya's machine</span>
+    <p>These are the real starting rules on Priya's machine: 195 allow rules in six groups. Switch a group off, add a rule of your own, then check a destination.</p>
+    <div class="sim-grid">
+      <div class="sim-col">
+        <h3>Rule groups in force</h3>
+        <div class="opts" id="sim-groups"></div>
+        <h3>Your rules</h3>
+        <div class="row">
+          <select id="sim-decision" aria-label="Rule decision"><option value="allow">Allow</option><option value="deny">Deny</option></select>
+          <input type="text" id="sim-rule" placeholder="api.github.com" aria-label="Host for the new rule" size="16">
+          <button type="button" class="quiet" id="sim-add">Add rule</button>
+        </div>
+        <span class="err" id="sim-rule-err" role="alert"></span>
+        <ul class="chips" id="sim-custom"></ul>
+      </div>
+      <div class="sim-col">
+        <h3>Check a destination</h3>
+        <div class="row">
+          <input type="text" id="sim-target" value="s3.amazonaws.com:443" aria-label="Destination to check" size="20">
+          <button type="button" id="sim-check">Check</button>
+        </div>
+        <span class="err" id="sim-target-err" role="alert"></span>
+        <div class="result" id="sim-out" aria-live="polite"></div>
+        <h3>Try these</h3>
+        <ol>
+          <li>Check <code>s3.amazonaws.com:443</code>. Switch off Cloud infrastructure and check again.</li>
+          <li>Check <code>pypi.org:443</code>, then <code>pypi.org:80</code>.</li>
+          <li>Add a deny rule for <code>api.github.com</code>, then check it.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex">
+    <span class="ex-tag">Exercise 1 · Trace four requests</span>
+    <p>Predict each result before you check it.</p>
+    <div id="trace-1"></div>
+  </div>
+</section>
+<!-- END section:s1 -->
+
+<!-- BEGIN section:s2 -->
+<section id="s2">
+  <p class="sec-no">Section 2</p>
+  <h2>A preset and a kit supply the rules a sandbox starts with</h2>
+  <p>The first time you run a sandbox, Docker asks you to choose a preset. The preset is the starting set of rules for every sandbox on that machine.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Preset</th><th>What it starts with</th></tr></thead>
+    <tbody>
+      <tr><td>Open</td><td>Everything is allowed.</td></tr>
+      <tr><td>Balanced</td><td>Everything is blocked, except a baseline list of destinations that development work commonly needs.</td></tr>
+      <tr><td>Locked Down</td><td>Everything is blocked until you or a kit allows it.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Priya chose Balanced. Her machine now has three policies.</p>
+  <div class="cards">
+    <div class="card"><h3>The local policy</h3><span class="id mono">local-policy</span><p>Holds the preset's 195 allow rules, in six groups, plus any rule you add. You can change it. It applies to every sandbox on the machine.</p></div>
+    <div class="card"><h3>The fallback</h3><span class="id mono">default-deny-all</span><p>One rule. It blocks any request that no other rule decides. It never overrides an allow rule, and you can't change it.</p></div>
+    <div class="card"><h3>The Claude Code kit policy</h3><span class="id mono">kit</span><p>Eight allow rules for the destinations Claude Code needs to run. It arrives with the kit and applies only to sandboxes that use the kit. You can't edit it.</p></div>
+  </div>
+  <p>Policies can also hold filesystem rules, which control the host folders a sandbox can mount. This course covers network rules only.</p>
+  <h3>The six groups in the local policy</h3>
+  <p>Each group has a purpose. The examples show what's inside. Entries that start with <code>**</code> cover a whole family of hosts, which section 4 explains.</p>
+  <div id="groups-overview" style="display:flex;flex-direction:column;gap:1rem;"></div>
+  <details><summary>Show the eight rules in the Claude Code kit policy</summary><ul class="rules" id="kit-rules"></ul></details>
+
+  <div class="ex">
+    <span class="ex-tag">Exercise 2 · Predict</span>
+    <p>Priya asks the agent in her sandbox to fix a failing test, then joins a meeting. Her sandbox uses the Balanced preset and the Claude Code kit. Which of these can the agent reach without asking her?</p>
+    <div class="opts" id="predict-opts"></div>
+    <div class="row"><button type="button" id="predict-btn">Check prediction</button><span class="err" id="predict-err" role="alert"></span></div>
+    <div id="predict-fb"></div>
+  </div>
+</section>
+<!-- END section:s2 -->
+
+<!-- BEGIN section:s3 -->
+<section id="s3">
+  <p class="sec-no">Section 3</p>
+  <h2>Every rule you add or remove changes what the team can do</h2>
+  <p>You can change the local policy in three ways. Each one has a consequence you can see right away.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Change</th><th>Consequence</th></tr></thead>
+    <tbody>
+      <tr><td>Remove a group</td><td>Every destination that only that group allowed is now blocked. That includes destinations you didn't know were in it.</td></tr>
+      <tr><td>Allow a host</td><td>That one destination is reachable again, and nothing else is.</td></tr>
+      <tr><td>Deny a host</td><td>That destination is blocked, even when a group or a kit allows it.</td></tr>
+    </tbody>
+  </table></div>
+  <p>The kit policy stays in place whatever you remove from the local policy.</p>
+
+  <div class="ex" id="cons">
+    <span class="ex-tag">Try it · Harden Priya's policy without breaking her work</span>
+    <p>Change the policy until nothing the team needs is broken and nothing unneeded is still open.</p>
+    <div class="sim-grid">
+      <div class="sim-col">
+        <h3>Rule groups in force</h3>
+        <div class="opts" id="cons-groups"></div>
+        <h3>Your rules</h3>
+        <div class="opts"><label for="cons-pw"><input type="checkbox" id="cons-pw"><span>Allow <code>cdn.playwright.dev</code></span></label></div>
+      </div>
+      <div class="sim-col">
+        <h3>What the agent can do now</h3>
+        <div class="tablewrap"><table><tbody id="cons-rows"></tbody></table></div>
+        <div id="cons-sum" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex">
+    <span class="ex-tag">Exercise 3 · Keep, remove, or depends</span>
+    <p>For each group, decide what you'd do on Priya's machine. Choose depends when you'd need one more fact first.</p>
+    <div id="groups-list"></div>
+    <div class="row"><button type="button" id="groups-btn">Check decisions</button><span class="err" id="groups-err" role="alert"></span></div>
+  </div>
+</section>
+<!-- END section:s3 -->
+
+<!-- BEGIN section:s4 -->
+<section id="s4">
+  <p class="sec-no">Section 4</p>
+  <h2>A wildcard allows more than it names</h2>
+  <p>Some rules use a wildcard to cover many hosts at once. The two kinds behave differently.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Rule</th><th>Matches</th><th>Doesn't match</th></tr></thead>
+    <tbody>
+      <tr><td><code>*.one.digicert.com</code><br>One star</td><td>One level below the name, such as <code>x.one.digicert.com</code></td><td><code>one.digicert.com</code> itself, and deeper names such as <code>a.b.one.digicert.com</code></td></tr>
+      <tr><td><code>**.amazonaws.com</code><br>Two stars</td><td>Every level below the name, such as <code>s3.amazonaws.com</code> and <code>any-bucket.s3.amazonaws.com</code>. Also <code>amazonaws.com</code> itself</td><td>Other domains</td></tr>
+    </tbody>
+  </table></div>
+  <p class="meta">Tested on <code>sbx</code> v0.54.0. Docker's reference documents the one-star behavior. The two-star match on the bare domain comes from testing.</p>
+  <p>The consequence: one two-star rule in the Cloud infrastructure group allows every storage bucket on AWS, including a bucket that belongs to someone else.</p>
+  <div class="ex">
+    <span class="ex-tag">Try it · Test a wildcard</span>
+    <div class="row">
+      <label for="wc-rule">Rule</label>
+      <select id="wc-rule"><option value="**.amazonaws.com">**.amazonaws.com</option><option value="*.one.digicert.com">*.one.digicert.com</option><option value="**.github.com">**.github.com</option></select>
+      <label for="wc-host">Host</label>
+      <input type="text" id="wc-host" value="any-bucket.s3.amazonaws.com" size="24">
+      <button type="button" id="wc-btn">Test</button>
+    </div>
+    <span class="err" id="wc-err" role="alert"></span>
+    <div class="result" id="wc-out" aria-live="polite"></div>
+  </div>
+
+  <div class="ex">
+    <span class="ex-tag">Exercise 4 · Wildcard consequences</span>
+    <p>Predict each result before you check it. All three use the Balanced preset, unchanged.</p>
+    <div id="trace-4"></div>
+  </div>
+</section>
+<!-- END section:s4 -->
+
+<!-- BEGIN section:assess -->
+<section id="assess">
+  <h2>Write your reply to Priya</h2>
+  <p>Priya asked you to review her policy, change what should change, and explain why. Write the message you'd send her. Say what you changed, what you left alone, and the reason for each.</p>
+  <div class="ex">
+    <span class="ex-tag">Assessment</span>
+    <label for="assess-text">Your reply</label>
+    <textarea id="assess-text" placeholder="Priya, I removed the cloud infrastructure group because we have no cloud account."></textarea>
+    <div class="row"><button type="button" id="assess-btn">Compare with a model reply</button><span class="err" id="assess-err" role="alert"></span></div>
+    <div id="assess-fb" hidden>
+      <div class="fb ok" style="display:flex;flex-direction:column;gap:0.6rem;">
+        <span>Model reply</span>
+        <span class="why">Priya, I changed two things on your machine and left four alone.</span>
+        <span class="why">I removed the Cloud infrastructure group. We have no cloud account, and three of its rules allowed any storage bucket on AWS, Google Cloud, and Azure. I allowed <code>cdn.playwright.dev</code> again so your browser tests can still download what they need.</span>
+        <span class="why">I removed the AI services group. The Claude Code kit already allows what Claude Code needs. If it stops working, tell me.</span>
+        <span class="why">I kept Package managers, Code and containers, OS packages, and Certificate validation. You need them for Python packages, GitHub, system tools, and secure connections.</span>
+        <span class="why">One risk stays. GitHub is allowed, so an agent can still send data to a repository or gist.</span>
+      </div>
+      <p style="margin-top:1rem;">Score your reply against the model. Tick each line that's true of what you wrote.</p>
+      <div class="opts" id="rubric" style="margin-top:0.6rem;"></div>
+      <p id="rubric-score" class="meta" style="margin-top:0.6rem;" aria-live="polite"></p>
+    </div>
+  </div>
+  <div class="ex">
+    <span class="ex-tag">Stretch · Optional</span>
+    <p>A second team builds a Node.js web app and deploys it to AWS. Write their reply. Start from what would break.</p>
+  </div>
+</section>
+<!-- END section:assess -->
+
+<!-- BEGIN section:next -->
+<section id="next">
+  <h2>Next: change and verify the policy</h2>
+  <p>In <a href="lesson-2.html">Lesson 2</a>, you make these changes on a real sandbox and verify each one. Keep your reply to Priya. It's your plan.</p>
+  <details>
+    <summary>Design notes for reviewers</summary>
+    <div style="display:flex;flex-direction:column;gap:0.8rem;padding-top:0.8rem;">
+      <p class="meta">These notes aren't part of the lesson. They trace each part to the need it serves.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Part</th><th>Objective</th><th>Instructional event</th></tr></thead>
+        <tbody>
+          <tr><td>Bus company story</td><td>-</td><td>Gain attention</td></tr>
+          <tr><td>Objectives and scenario</td><td>-</td><td>State objectives</td></tr>
+          <tr><td>Key terms review</td><td>-</td><td>Recall prior learning</td></tr>
+          <tr><td>Section 1</td><td>1</td><td>Present, guide, elicit, give feedback</td></tr>
+          <tr><td>Section 2</td><td>2</td><td>Present, elicit, give feedback</td></tr>
+          <tr><td>Sections 3 and 4</td><td>3</td><td>Present, guide, elicit, give feedback</td></tr>
+          <tr><td>Reply to Priya</td><td>1, 2, 3</td><td>Assess performance</td></tr>
+          <tr><td>Stretch and handoff to Lesson 2</td><td>3</td><td>Enhance retention and transfer</td></tr>
+        </tbody>
+      </table></div>
+      <p class="meta">Sections follow the assertion-evidence pattern: a sentence heading states the takeaway, the body is evidence for it, and an exercise tests it. Section headings are sentences by design, which departs from the eight-word heading limit in Docker's documentation style guide. Voice, word choice, and formatting follow that guide.</p>
+      <p class="meta">This lesson uses plain language and no commands. Lesson 2 introduces the commands. Rule data comes from a reset Balanced preset on <code>sbx</code> v0.54.0, Windows 11. Every interactive result reproduces a result from the real CLI.</p>
+    </div>
+  </details>
+</section>
+<!-- END section:next -->
+
+</main>
+<script>
+var DATA = {"version":"0.54.0","captured":"Nov. 16, 2026","order":["default-ai-services","default-package-managers","default-code-and-containers","default-cloud-infrastructure","default-os-packages","default-cert-validation"],"groups":{"default-ai-services":["**.chatgpt.com:443","**.cursor.sh:443","**.factory.ai:443","**.oaistatic.com:443","**.oaiusercontent.com:443","**.openai.com:443","api.anthropic.com:443","api.perplexity.ai:443","api.workos.com:443","bridge.claudeusercontent.com:443","cdn.openaimerge.com:443","chatgpt.com:443","claude.com:443","cursor.com:443","downloads.claude.ai:443","factory.ai:443","gemini.google.com:443","generativelanguage.googleapis.com:443","mcp-proxy.anthropic.com:443","models.dev:443","platform.claude.com:443","play.googleapis.com:443","statsig.anthropic.com:443"],"default-package-managers":["**.bun.sh:443","**.gradle.org:443","**.packagist.org:443","**.yarnpkg.com:443","apache.org:443","astral.sh:443","bootstrap.pypa.io:443","bun.sh:443","cocoapods.org:443","cpan.org:443","crates.io:443","deb.nodesource.com:443","dot.net:443","dotnet.microsoft.com:443","eclipse.org:443","files.pythonhosted.org:443","golang.org:443","goproxy.io:443","gradle.org:443","haskell.org:443","hex.pm:443","index.crates.io:443","java.com:443","java.net:443","maven.org:443","metacpan.org:443","nodejs.org:443","npm.duckdb.org:443","npmjs.com:443","npmjs.org:443","nuget.org:443","packagist.com:443","packagist.org:443","pkg.go.dev:443","proxy.golang.org:443","pub.dev:443","pypa.io:443","pypi.org:443","pypi.python.org:443","pythonhosted.org:443","registry.npmjs.org:443","repo.maven.apache.org:443","ruby-lang.org:443","rubygems.org:443","rubyonrails.org:443","rustup.rs:443","rvm.io:443","sh.rustup.rs:443","spring.io:443","static.crates.io:443","static.rust-lang.org:443","sum.golang.org:443","swift.org:443","tuf-repo-cdn.sigstore.dev:443","yarnpkg.com:443","ziglang.org:443"],"default-code-and-containers":["**.data.mcr.microsoft.com:443","**.docker.com:443","**.docker.io:443","**.gcr.io:443","**.github.com:443","**.githubcopilot.com:443","**.githubusercontent.com:443","**.gitlab.com:443","**.production.cloudflare.docker.com:443","**.production.cloudfront.docker.com:443","bitbucket.org:443","code.visualstudio.com:443","d2glxqk2uabbnd.cloudfront.net:443","dhi.io:443","dhi.io:80","docker-images-prod.6aa30f8b08e16409b46e0173d6de2f56.r2.cloudflarestorage.com:443","docker.com:443","docker.io:443","gcr.io:443","ghcr.io:443","github.com:443","gitlab.com:443","k8s.io:443","launchpad.net:443","mcr.microsoft.com:443","ppa.launchpad.net:443","production.cloudflare.docker.com:443","production.cloudfront.docker.com:443","public.ecr.aws:443","quay.io:443","registry.k8s.io:443","sourceforge.net:443","vscode.dev:443","vscode.download.prss.microsoft.com:443"],"default-cloud-infrastructure":["**.amazonaws.com:443","**.blob.core.windows.net:443","**.googleapis.com:443","**.googleusercontent.com:443","**.gstatic.com:443","**.gvt1.com:443","**.hashicorp.com:443","**.public.blob.vercel-storage.com:443","**.visualstudio.com:443","apis.google.com:443","app.daytona.io:443","azure.com:443","binaries.prisma.sh:443","cdn.playwright.dev:443","challenges.cloudflare.com:443","clerk.com:443","csp.withgoogle.com:443","dev.azure.com:443","dl.google.com:443","fastly.com:443","figma.com:443","hashicorp.com:443","jsdelivr.net:443","json-schema.org:443","json.schemastore.org:443","login.microsoftonline.com:443","mise-versions.jdx.dev:443","mise.run:443","packages.microsoft.com:443","play.google.com:443","playwright.azureedge.net:443","supabase.com:443","unpkg.com:443","vercel.com:443","visualstudio.com:443","www.google.com:443"],"default-os-packages":["**.debian.org:443","alpinelinux.org:443","apt.llvm.org:443","archive.ubuntu.com:443","archive.ubuntu.com:80","archlinux.org:443","centos.org:443","debian.org:443","dl-cdn.alpinelinux.org:443","fedoraproject.org:443","packagecloud.io:443","ports.ubuntu.com:443","ports.ubuntu.com:80","security.ubuntu.com:443","security.ubuntu.com:80","ubuntu.com:443"],"default-cert-validation":["**.amazontrust.com:443","**.amazontrust.com:80","**.lencr.org:443","**.lencr.org:80","**.pki.goog:443","**.pki.goog:80","**.pki.microsoft.com:443","**.pki.microsoft.com:80","*.one.au.digicert.com:80","*.one.ch.digicert.com:80","*.one.digicert.co.jp:80","*.one.digicert.com:80","*.one.nl.digicert.com:80","cacerts.digicert.com:80","crl*.digicert.com:80","crl.comodoca.com:80","crl.globalsign.com:80","crl.globalsign.net:80","crl.sectigo.com:80","crl.usertrust.com:80","crt.sectigo.com:80","isrg.trustid.ocsp.identrust.com:80","ocsp.comodoca.com:80","ocsp.digicert.com:80","ocsp.globalsign.com:443","ocsp.globalsign.com:80","ocsp.sectigo.com:80","ocsp.usertrust.com:80","ocsp2.globalsign.com:443","ocsp2.globalsign.com:80"]},"kit":["api.anthropic.com:443","bridge.claudeusercontent.com:443","claude.com:443","deb.debian.org:80","dhi.io:80","downloads.claude.ai:443","mcp-proxy.anthropic.com:443","platform.claude.com:443"]};
+function escRe(s) { return s.replace(/[.+?^${}()|[\]\\]/g, '\\$&'); }
+
+function hostMatch(pattern, host) {
+  var p = pattern.toLowerCase(), h = host.toLowerCase();
+  if (p === '**') return true;
+  if (p.indexOf('**.') === 0) return h === p.slice(3) || (h.length > p.length - 3 && h.slice(-(p.length - 2)) === p.slice(2));
+  if (p.indexOf('*.') === 0) {
+    var base = p.slice(1);
+    if (h.slice(-base.length) !== base) return false;
+    var pre = h.slice(0, h.length - base.length);
+    return pre.length > 0 && pre.indexOf('.') === -1;
+  }
+  if (p.indexOf('*') !== -1) {
+    return new RegExp('^' + p.split('*').map(escRe).join('[^.]*') + '$').test(h);
+  }
+  return p === h;
+}
+
+function splitResource(res) {
+  var i = res.lastIndexOf(':');
+  if (i > 0 && /^\d+$/.test(res.slice(i + 1))) return { host: res.slice(0, i), port: res.slice(i + 1) };
+  return { host: res, port: null };
+}
+
+function parseTarget(raw) {
+  var t = String(raw || '').trim().toLowerCase();
+  t = t.replace(/^[a-z]+:\/\//, '').replace(/[\/?#].*$/, '');
+  if (!t) return null;
+  var r = splitResource(t);
+  if (!/^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$/.test(r.host)) return null;
+  return { host: r.host, port: r.port || '443' };
+}
+
+function resourceMatches(res, target) {
+  var r = splitResource(res);
+  if (r.port !== null && r.port !== target.port) return false;
+  return hostMatch(r.host, target.host);
+}
+
+function checkPolicy(data, state, raw) {
+  var target = parseTarget(raw);
+  if (!target) return null;
+  var out = { target: target.host + ':' + target.port, context: state.kit ? 'sandbox:demo' : 'global' };
+  var i, j, custom = state.custom || [];
+  for (i = 0; i < custom.length; i++) {
+    if (custom[i].decision === 'deny' && resourceMatches(custom[i].resource, target)) {
+      out.allowed = false; out.reason = 'denied by local rule for ' + custom[i].resource; out.matched = custom[i].resource; out.kind = 'deny'; return out;
+    }
+  }
+  for (i = 0; i < data.order.length; i++) {
+    var id = data.order[i];
+    if (state.groups[id] === false) continue;
+    var res = data.groups[id];
+    for (j = 0; j < res.length; j++) {
+      if (resourceMatches(res[j], target)) { out.allowed = true; out.rule = id; out.matched = res[j]; out.kind = 'group'; return out; }
+    }
+  }
+  for (i = 0; i < custom.length; i++) {
+    if (custom[i].decision === 'allow' && resourceMatches(custom[i].resource, target)) {
+      out.allowed = true; out.rule = 'your allow rule for ' + custom[i].resource; out.matched = custom[i].resource; out.kind = 'custom'; return out;
+    }
+  }
+  if (state.kit) {
+    for (j = 0; j < data.kit.length; j++) {
+      if (resourceMatches(data.kit[j], target)) { out.allowed = true; out.rule = 'kit:demo'; out.matched = data.kit[j]; out.kind = 'kit'; return out; }
+    }
+  }
+  out.allowed = false; out.reason = 'no matching allow rule (default deny)'; out.kind = 'fallback';
+  return out;
+}
+
+
+</script>
+<script>
+(function () {
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag), k;
+    if (attrs) for (k in attrs) {
+      if (k === 'text') n.textContent = attrs[k];
+      else if (k === 'cls') n.className = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach(function (c) { n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return n;
+  }
+  function $(id) { return document.getElementById(id); }
+  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); }
+  function allOn() { var g = {}; DATA.order.forEach(function (id) { g[id] = true; }); return g; }
+  function without(ids) { var g = allOn(); ids.forEach(function (id) { g[id] = false; }); return g; }
+  var NAMES = {
+    'default-ai-services': 'AI services', 'default-package-managers': 'Package managers',
+    'default-code-and-containers': 'Code and containers', 'default-cloud-infrastructure': 'Cloud infrastructure',
+    'default-os-packages': 'OS packages', 'default-cert-validation': 'Certificate validation'
+  };
+  function decidedBy(r) {
+    if (r.kind === 'group') return 'Decided by the ' + NAMES[r.rule] + ' group.';
+    if (r.kind === 'custom') return 'Decided by your allow rule for ' + r.matched + '.';
+    if (r.kind === 'kit') return 'Decided by the Claude Code kit policy.';
+    if (r.kind === 'deny') return 'Decided by your deny rule for ' + r.matched + '.';
+    return 'No rule allows it, so the fallback decides.';
+  }
+  function showResult(box, r) {
+    clear(box);
+    box.className = 'result ' + (r.allowed ? 'ok' : 'no');
+    box.appendChild(el('span', { cls: 'pill ' + (r.allowed ? 'ok' : 'no'), text: r.allowed ? 'Allowed' : 'Blocked' }));
+    box.appendChild(el('span', { text: ' ' + r.target + '. ' + decidedBy(r) }));
+  }
+  function fb(kind, head, why) {
+    var d = el('div', { cls: 'fb ' + kind });
+    d.appendChild(el('span', { text: head + ' ' }));
+    if (why) d.appendChild(el('span', { cls: 'why', text: why }));
+    return d;
+  }
+  function radioGroup(name, options) {
+    var wrap = el('div', { cls: 'inline' });
+    options.forEach(function (o, i) {
+      var id = name + '-' + i;
+      wrap.appendChild(el('label', { 'for': id }, [el('input', { type: 'radio', name: name, id: id, value: o.value }), el('span', { text: o.label })]));
+    });
+    return wrap;
+  }
+  function picked(name) { var c = document.querySelector('input[name="' + name + '"]:checked'); return c ? c.value : null; }
+  function clearOnChange(container, errId) { container.addEventListener('change', function () { $(errId).textContent = ''; }); }
+  function groupToggles(container, prefix, state, onChange) {
+    DATA.order.forEach(function (id) {
+      var cb = el('input', { type: 'checkbox', id: prefix + id }); cb.checked = true;
+      cb.addEventListener('change', function () { state[id] = cb.checked; onChange(); });
+      container.appendChild(el('label', { 'for': prefix + id }, [cb, el('span', null, [el('span', { text: NAMES[id] }), el('span', { cls: 'count', text: ' ' + DATA.groups[id].length + ' rules' })])]));
+    });
+  }
+  function ruleList(items) { var ul = el('ul', { cls: 'rules' }); items.forEach(function (r) { ul.appendChild(el('li', { text: r })); }); return ul; }
+  function traceExercise(container, prefix, cases) {
+    cases.forEach(function (c, i) {
+      var name = prefix + i, err = el('span', { cls: 'err', role: 'alert' }), out = el('div');
+      var btn = el('button', { type: 'button', cls: 'quiet', text: 'Check' });
+      var rg = radioGroup(name, [{ value: 'allowed', label: 'Allowed' }, { value: 'blocked', label: 'Blocked' }]);
+      rg.addEventListener('change', function () { err.textContent = ''; });
+      btn.addEventListener('click', function () {
+        var v = picked(name); clear(out);
+        if (!v) { err.textContent = 'Choose Allowed or Blocked first.'; return; }
+        var r = checkPolicy(DATA, c.state, c.target), ok = (v === 'allowed') === r.allowed;
+        out.appendChild(fb(ok ? 'ok' : 'no', (ok ? 'Correct. ' : 'Not this time. ') + (r.allowed ? 'Allowed.' : 'Blocked.'), c.why));
+      });
+      container.appendChild(el('div', { cls: 'case' }, [
+        el('p', null, [el('span', { cls: 'count', text: (i + 1) + ' of ' + cases.length + '  ' }), c.setup + ' The agent sends a request to ', el('code', { text: c.target }), '.']),
+        rg, el('div', { cls: 'row' }, [btn, err]), out]));
+    });
+  }
+
+  /* Key terms */
+  var terms = [
+    { term: 'host', def: 'The name or address of the machine a request goes to, such as pypi.org.' },
+    { term: 'port', def: 'The numbered entry point on that machine. Secure web traffic uses 443 and unencrypted web traffic uses 80.' },
+    { term: 'egress', def: 'Traffic that leaves the sandbox for somewhere else.' },
+    { term: 'allowlist', def: 'A list of permitted destinations. Anything absent from the list is blocked.' },
+    { term: 'preset', def: 'The starting set of network rules you choose before you add your own.' },
+    { term: 'kit', def: 'A package that sets up an agent in a sandbox and brings the network rules that agent needs.' }
+  ];
+  var termNames = ['allowlist', 'egress', 'host', 'kit', 'port', 'preset'];
+  var tl = $('terms-list');
+  terms.forEach(function (t, i) {
+    var sel = el('select', { id: 'term-' + i }, [el('option', { value: '', text: 'Choose a term' })]);
+    termNames.forEach(function (n) { sel.appendChild(el('option', { value: n, text: n })); });
+    tl.appendChild(el('div', { cls: 'term' }, [el('label', { 'for': 'term-' + i, text: t.def }), el('div', { cls: 'row' }, [sel, el('span', { id: 'term-res-' + i })])]));
+  });
+  clearOnChange(tl, 'terms-err');
+  $('terms-btn').addEventListener('click', function () {
+    var i, vals = [], out = $('terms-fb'); clear(out);
+    for (i = 0; i < terms.length; i++) vals.push($('term-' + i).value);
+    if (vals.indexOf('') !== -1) { $('terms-err').textContent = 'Choose a term for every description first.'; return; }
+    var right = 0;
+    terms.forEach(function (t, j) {
+      var ok = vals[j] === t.term; if (ok) right++;
+      var s = $('term-res-' + j); s.textContent = ok ? 'Correct' : 'This one is ' + t.term;
+      s.style.color = ok ? 'var(--ok)' : 'var(--no)';
+    });
+    out.appendChild(fb(right === terms.length ? 'ok' : 'warn', right + ' of ' + terms.length + ' correct.',
+      right === terms.length ? "You're ready for the rest of the lesson." : 'Read the corrected terms above before you go on.'));
+  });
+
+  /* Section 1 simulator */
+  var sim = { groups: allOn(), custom: [] };
+  function runSim() {
+    var r = checkPolicy(DATA, { groups: sim.groups, kit: false, custom: sim.custom }, $('sim-target').value);
+    if (!r) { $('sim-target-err').textContent = 'Enter a host such as pypi.org or pypi.org:443.'; clear($('sim-out')); $('sim-out').className = 'result'; return; }
+    $('sim-target-err').textContent = ''; showResult($('sim-out'), r);
+  }
+  groupToggles($('sim-groups'), 'sim-', sim.groups, runSim);
+  function renderCustom() {
+    var ul = $('sim-custom'); clear(ul);
+    sim.custom.forEach(function (c, i) {
+      var b = el('button', { type: 'button', cls: 'quiet', text: 'Remove', 'aria-label': 'Remove the ' + c.decision + ' rule for ' + c.resource });
+      b.addEventListener('click', function () { sim.custom.splice(i, 1); renderCustom(); runSim(); });
+      ul.appendChild(el('li', null, [el('span', { text: c.decision + ' ' + c.resource }), b]));
+    });
+  }
+  $('sim-add').addEventListener('click', function () {
+    var raw = $('sim-rule').value.trim().toLowerCase();
+    if (!/^(\*\*?\.)?[a-z0-9]([a-z0-9.-]*[a-z0-9])?(:\d+)?$/.test(raw)) { $('sim-rule-err').textContent = 'Enter a host such as api.github.com. A port is optional.'; return; }
+    $('sim-rule-err').textContent = '';
+    sim.custom.push({ decision: $('sim-decision').value, resource: raw });
+    $('sim-rule').value = ''; renderCustom(); runSim();
+  });
+  $('sim-rule').addEventListener('input', function () { $('sim-rule-err').textContent = ''; });
+  $('sim-target').addEventListener('input', function () { $('sim-target-err').textContent = ''; });
+  $('sim-target').addEventListener('keydown', function (e) { if (e.key === 'Enter') runSim(); });
+  $('sim-check').addEventListener('click', runSim);
+  runSim();
+
+  /* Exercise 1 */
+  traceExercise($('trace-1'), 'trace1-', [
+    { setup: 'The Balanced preset is unchanged.', target: 'pypi.org:443', state: { groups: allOn() },
+      why: 'A rule in the Package managers group names this host and this port.' },
+    { setup: 'The Balanced preset is unchanged.', target: 'pypi.org:80', state: { groups: allOn() },
+      why: 'The allow rule is for port 443. Port 80 is a different destination, and no rule allows it.' },
+    { setup: 'You added a deny rule for api.github.com.', target: 'api.github.com:443', state: { groups: allOn(), custom: [{ decision: 'deny', resource: 'api.github.com' }] },
+      why: 'The Code and containers group allows this host. Your deny rule wins over the allow rule.' },
+    { setup: 'The Balanced preset is unchanged.', target: 'paste.example.com:443', state: { groups: allOn() },
+      why: 'No rule names this destination, so the fallback blocks it. The sandbox then asks you to approve it.' }
+  ]);
+
+  /* Section 2 overview */
+  var groupInfo = {
+    'default-ai-services': { desc: 'APIs and sites for AI providers.', hi: ['api.anthropic.com', '**.openai.com', 'gemini.google.com'], ok: ['remove', 'depends'],
+      keep: 'The team uses one agent, Claude Code. This group also allows OpenAI, Cursor, Gemini, and Perplexity destinations that nobody on the team needs. Each one is a place an agent can send data.',
+      remove: "The Claude Code kit policy allows the eight destinations its agent needs. Confirm in the lab that Claude Code still starts on Priya's machine after you remove this group.",
+      depends: 'A fair answer if the fact you need is whether the kit policy alone lets Claude Code run. The lab tests that.' },
+    'default-package-managers': { desc: 'Package indexes and language toolchains for Python, JavaScript, Java, Go, Rust, Ruby, and more.', hi: ['pypi.org', 'registry.npmjs.org', 'crates.io'], ok: ['keep'],
+      keep: 'Python installs come from pypi.org and files.pythonhosted.org, and both are in this group. The group also allows indexes for languages the team never uses. Narrowing it is a good next step.',
+      remove: 'The next Python package install inside a sandbox would be blocked, and Priya would ask for the group back within the hour.',
+      depends: "The team's language is known: Python. That settles it. Keep the group, and consider narrowing it later." },
+    'default-code-and-containers': { desc: 'Code hosts and container registries.', hi: ['**.github.com', '**.docker.io', '**.gitlab.com'], ok: ['keep'],
+      keep: 'The team keeps code on GitHub, so this group stays. Know what you accept with it: the GitHub rules also let an agent send data to any repository or gist it can sign in to. The policy leaves that risk in place.',
+      remove: 'Every clone from GitHub and every push to it would be blocked. The team could not work.',
+      depends: "The team's code host is known: GitHub. Keep the group, and record the risk that stays." },
+    'default-cloud-infrastructure': { desc: 'Cloud providers, plus content delivery networks and developer services.', hi: ['**.amazonaws.com', '**.googleapis.com', 'cdn.playwright.dev'], ok: ['remove'],
+      keep: 'The team has no cloud account, so the rules for three cloud providers give it nothing. They do give an agent somewhere to send data.',
+      remove: "The strongest candidate. Three rules allow any storage bucket on AWS, Google Cloud, and Azure, including a bucket someone else controls. Read the rules before you remove the group. It also holds cdn.playwright.dev, which Priya's browser tests download from. Remove the group, then allow that one host again.",
+      depends: 'Close. The group holds hosts the team does need, such as cdn.playwright.dev. That is a reason to remove the group and allow single hosts again.' },
+    'default-os-packages': { desc: 'Operating system package mirrors for Debian, Ubuntu, Alpine, and others.', hi: ['**.debian.org', 'archive.ubuntu.com'], ok: ['keep', 'depends'],
+      keep: 'Agents install system tools as they work. These hosts serve packages and accept very little, so they are a poor place to send data.',
+      remove: 'The next system tool install inside a sandbox would be blocked. The exposure you remove is small, because these hosts serve packages and accept very little.',
+      depends: 'Reasonable if you would first check whether agents install system tools. In practice they do, and often.' },
+    'default-cert-validation': { desc: 'Services that tools use to check whether a security certificate is still valid.', hi: ['ocsp.digicert.com', '**.lencr.org'], ok: ['keep'],
+      keep: 'These hosts answer certificate checks for every other secure connection. Most of the rules are for port 80 because that is how the checks are served.',
+      remove: 'Certificate checks would fail or stall, with errors that are hard to trace back to this change. The exposure you remove is small.',
+      depends: 'There is little to weigh here. This group supports every other secure connection the team makes.' }
+  };
+  var go = $('groups-overview');
+  DATA.order.forEach(function (id) {
+    var info = groupInfo[id], n = DATA.groups[id].length, ex = el('p', null, ['For example: ']);
+    info.hi.forEach(function (h, i) { if (i) ex.appendChild(document.createTextNode(', ')); ex.appendChild(el('code', { text: h })); });
+    go.appendChild(el('div', { cls: 'card' }, [
+      el('div', { cls: 'group-head' }, [el('span', { cls: 'gname', text: NAMES[id] }), el('span', { cls: 'count', text: n + ' rules' }), el('span', { cls: 'id mono', text: id })]),
+      el('p', { text: info.desc }), ex,
+      el('details', null, [el('summary', { text: 'Show all ' + n + ' rules' }), ruleList(DATA.groups[id])])]));
+  });
+  DATA.kit.forEach(function (r) { $('kit-rules').appendChild(el('li', { text: r })); });
+
+  /* Exercise 2 */
+  var words = ['zero', 'one', 'two', 'three', 'four', 'five', 'six'];
+  var predictItems = [
+    { label: 'The Python package index', target: 'pypi.org:443' },
+    { label: 'GitHub', target: 'github.com:443' },
+    { label: "Anthropic's API, which Claude Code depends on", target: 'api.anthropic.com:443' },
+    { label: 'A storage bucket on AWS that belongs to someone else', target: 'someone-elses-bucket.s3.amazonaws.com:443' },
+    { label: 'An Ubuntu package mirror', target: 'archive.ubuntu.com:443' },
+    { label: 'A paste site', target: 'paste.example.com:443' }
+  ];
+  var po = $('predict-opts');
+  predictItems.forEach(function (it, i) {
+    po.appendChild(el('label', { 'for': 'predict-' + i }, [el('input', { type: 'checkbox', id: 'predict-' + i }), el('span', { text: it.label })]));
+  });
+  po.appendChild(el('label', { 'for': 'predict-none' }, [el('input', { type: 'checkbox', id: 'predict-none' }), el('span', { text: 'None of these' })]));
+  clearOnChange(po, 'predict-err');
+  $('predict-btn').addEventListener('click', function () {
+    var out = $('predict-fb'); clear(out);
+    var any = $('predict-none').checked, right = 0, allowedCount = 0;
+    var rows = predictItems.map(function (it, i) {
+      var ticked = $('predict-' + i).checked; if (ticked) any = true;
+      var r = checkPolicy(DATA, { groups: allOn(), kit: true }, it.target);
+      if (r.allowed) allowedCount++;
+      if (ticked === r.allowed) right++;
+      return { it: it, r: r };
+    });
+    if (!any) { $('predict-err').textContent = 'Tick at least one, or tick None of these.'; return; }
+    out.appendChild(fb(right === predictItems.length ? 'ok' : 'warn', 'You predicted ' + right + ' of ' + predictItems.length + '.',
+      'The agent can reach ' + words[allowedCount] + ' of the ' + words[predictItems.length] + ' without asking. The paste site is blocked, and the sandbox asks Priya to approve it.'));
+    var tb = el('tbody');
+    rows.forEach(function (x) {
+      tb.appendChild(el('tr', null, [el('td', { text: x.it.label }),
+        el('td', null, [el('span', { cls: 'pill ' + (x.r.allowed ? 'ok' : 'no'), text: x.r.allowed ? 'Allowed' : 'Blocked' })]),
+        el('td', { text: decidedBy(x.r) })]));
+    });
+    out.appendChild(el('div', { cls: 'tablewrap', style: 'margin-top:0.8rem;' }, [el('table', null, [tb])]));
+    out.appendChild(el('p', { style: 'margin-top:0.8rem;', text: "Someone else's storage bucket is allowed because one rule in the Cloud infrastructure group covers every host under amazonaws.com. Whether Priya's team needs that rule is yours to decide in section 3." }));
+  });
+
+  /* Section 3 consequences */
+  var cons = { groups: allOn() };
+  var acts = [
+    { label: 'Install a Python package', target: 'pypi.org:443', need: true },
+    { label: 'Clone a repository from GitHub', target: 'github.com:443', need: true },
+    { label: 'Run Claude Code', target: 'api.anthropic.com:443', need: true },
+    { label: "Download Playwright's test browsers", target: 'cdn.playwright.dev:443', need: true },
+    { label: 'Install a system tool', target: 'archive.ubuntu.com:443', need: true },
+    { label: 'Upload files to any storage bucket on AWS', target: 'any-bucket.s3.amazonaws.com:443', need: false },
+    { label: 'Send data to an AI provider nobody uses', target: 'api.openai.com:443', need: false }
+  ];
+  function runCons() {
+    var custom = $('cons-pw').checked ? [{ decision: 'allow', resource: 'cdn.playwright.dev' }] : [];
+    var tb = $('cons-rows'), broken = 0, open = 0; clear(tb);
+    acts.forEach(function (a) {
+      var r = checkPolicy(DATA, { groups: cons.groups, kit: true, custom: custom }, a.target), kind, text;
+      if (a.need) { kind = r.allowed ? 'ok' : 'no'; text = r.allowed ? 'Works' : 'Broken'; if (!r.allowed) broken++; }
+      else { kind = r.allowed ? 'warn' : 'ok'; text = r.allowed ? 'Still open' : 'Closed'; if (r.allowed) open++; }
+      tb.appendChild(el('tr', null, [
+        el('td', { style: 'width:6.5rem;' }, [el('span', { cls: 'pill ' + kind, text: text })]),
+        el('td', null, [el('span', { text: a.label }), el('br'), el('span', { cls: 'sub', text: (a.need ? 'The team needs this. ' : 'Nobody needs this. ') + decidedBy(r) })])]));
+    });
+    var sum = $('cons-sum'); clear(sum);
+    if (!broken && !open) sum.appendChild(fb('ok', 'Hardened.', 'Everything the team needs works, and nothing unneeded is open.'));
+    else sum.appendChild(fb('warn', broken + ' broken, ' + open + ' still open.', broken ? 'Something the team needs is blocked. Bring back only what they need.' : 'Find the group that allows what nobody needs.'));
+  }
+  groupToggles($('cons-groups'), 'cons-', cons.groups, runCons);
+  $('cons-pw').addEventListener('change', runCons);
+  runCons();
+
+  /* Exercise 3 */
+  var gl = $('groups-list'), gOut = {};
+  DATA.order.forEach(function (id) {
+    var info = groupInfo[id], n = DATA.groups[id].length;
+    gOut[id] = el('div');
+    gl.appendChild(el('div', { cls: 'group' }, [
+      el('div', { cls: 'group-head' }, [el('span', { cls: 'gname', text: NAMES[id] }), el('span', { cls: 'count', text: n + ' rules' })]),
+      el('details', null, [el('summary', { text: 'Show all ' + n + ' rules' }), ruleList(DATA.groups[id])]),
+      radioGroup('g-' + id, [{ value: 'keep', label: 'Keep' }, { value: 'remove', label: 'Remove' }, { value: 'depends', label: 'Depends' }]),
+      gOut[id]]));
+  });
+  clearOnChange(gl, 'groups-err');
+  $('groups-btn').addEventListener('click', function () {
+    var missing = DATA.order.filter(function (id) { return !picked('g-' + id); });
+    if (missing.length) { $('groups-err').textContent = 'Decide for every group first. ' + missing.length + ' left.'; return; }
+    DATA.order.forEach(function (id) {
+      var v = picked('g-' + id), info = groupInfo[id], ok = info.ok.indexOf(v) !== -1;
+      clear(gOut[id]);
+      gOut[id].appendChild(fb(ok ? 'ok' : 'no', ok ? 'Sound for this team.' : 'Reconsider.', info[v]));
+    });
+  });
+
+  /* Section 4 wildcard tester */
+  function runWc() {
+    var h = $('wc-host').value.trim().toLowerCase(), box = $('wc-out'), rule = $('wc-rule').value;
+    if (!/^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$/.test(h)) { $('wc-err').textContent = 'Enter a host name such as s3.amazonaws.com, with no port.'; clear(box); box.className = 'result'; return; }
+    $('wc-err').textContent = '';
+    var m = hostMatch(rule, h); clear(box); box.className = 'result ' + (m ? 'ok' : 'no');
+    box.appendChild(el('span', { cls: 'pill ' + (m ? 'ok' : 'no'), text: m ? 'Matches' : "Doesn't match" }));
+    box.appendChild(el('span', { text: ' The rule ' + rule + (m ? ' covers ' : " doesn't cover ") + h + '.' }));
+  }
+  $('wc-btn').addEventListener('click', runWc);
+  $('wc-rule').addEventListener('change', runWc);
+  $('wc-host').addEventListener('input', function () { $('wc-err').textContent = ''; });
+  $('wc-host').addEventListener('keydown', function (e) { if (e.key === 'Enter') runWc(); });
+  runWc();
+
+  /* Exercise 4 */
+  traceExercise($('trace-4'), 'trace4-', [
+    { setup: 'The closest rule is *.one.digicert.com on port 80.', target: 'a.b.one.digicert.com:80', state: { groups: allOn() },
+      why: 'A one-star wildcard covers one level. This host is two levels below one.digicert.com, so no rule matches.' },
+    { setup: 'The closest rule is **.amazonaws.com on port 443.', target: 'amazonaws.com:443', state: { groups: allOn() },
+      why: 'A two-star wildcard covers every level below the name, and the bare name as well.' },
+    { setup: 'Nobody on the team owns this bucket.', target: 'someone-elses-bucket.s3.amazonaws.com:443', state: { groups: allOn() },
+      why: 'The same two-star rule covers every host under amazonaws.com. The rule cannot tell your bucket from anyone else\'s.' }
+  ]);
+  /* Declarative multiple-choice questions: <div class="q" data-options="A|B|C" data-answer="1" data-fb0=".." data-fb1=".." data-fb2=".."></div> */
+  var quid = 0;
+  document.querySelectorAll('.q').forEach(function (q) {
+    var answer = Number(q.getAttribute('data-answer')), name = 'dq' + (quid++), wrap = el('div', { cls: 'opts' });
+    q.getAttribute('data-options').split('|').forEach(function (o, i) {
+      wrap.appendChild(el('label', { 'for': name + '-' + i }, [el('input', { type: 'radio', name: name, id: name + '-' + i, value: String(i) }), el('span', { text: o })]));
+    });
+    var err = el('span', { cls: 'err', role: 'alert' }), out = el('div', { style: 'margin-top:0.6rem;' });
+    var btn = el('button', { type: 'button', cls: 'quiet', text: 'Check' });
+    q.appendChild(wrap); q.appendChild(el('div', { cls: 'row', style: 'margin-top:0.8rem;' }, [btn, err])); q.appendChild(out);
+    q.addEventListener('change', function () { err.textContent = ''; });
+    btn.addEventListener('click', function () {
+      var c = wrap.querySelector('input:checked'); clear(out);
+      if (!c) { err.textContent = 'Choose an answer first.'; return; }
+      var v = Number(c.value);
+      out.appendChild(fb(v === answer ? 'ok' : 'no', v === answer ? 'Correct.' : 'Not this one.', q.getAttribute('data-fb' + v)));
+    });
+  });
+
+  /* Assessment */
+  var rubric = [
+    'It says what I changed and what I left alone.',
+    "It gives a reason tied to the team's work for each change.",
+    'It brings back at least one host from a group I removed.',
+    'It names a risk that the policy leaves in place.',
+    'A junior developer could follow it without looking anything up.'
+  ];
+  var rb = $('rubric');
+  rubric.forEach(function (t, i) {
+    rb.appendChild(el('label', { 'for': 'rubric-' + i }, [el('input', { type: 'checkbox', id: 'rubric-' + i }), el('span', { text: t })]));
+  });
+  rb.addEventListener('change', function () {
+    var n = rb.querySelectorAll('input:checked').length;
+    $('rubric-score').textContent = 'Your reply meets ' + n + ' of ' + rubric.length + ' criteria.' + (n < rubric.length ? ' Revise it before the lab. Your reply is the plan you follow there.' : ' Take it into the lab as your plan.');
+  });
+  $('assess-text').addEventListener('input', function () { $('assess-err').textContent = ''; });
+  $('assess-btn').addEventListener('click', function () {
+    if ($('assess-text').value.trim().length < 40) { $('assess-err').textContent = 'Write your reply first. A few sentences is enough.'; return; }
+    $('assess-fb').hidden = false;
+  });
+})();
+</script>
+</body>
+</html>

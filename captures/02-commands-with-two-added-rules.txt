@@ -1,0 +1,399 @@
+C:\Users\David>sbx policy ls
+
+  POLICY                                 SOURCE   APPLIES TO     SUMMARY
+  b7cb4c10-fc4f-4f22-a9e6-5b501da575d4   kit      sandbox:day3   network: 8 allow
+  default-deny-all                       local    all            network: deny when no rule decides
+  local-policy                           local    all            network: 196 allow, 1 deny; filesystem read: 1 allow; filesystem write: 1 allow
+
+
+C:\Users\David>sbx policy ls day3
+
+    Policy for sandbox:  day3
+
+  NETWORK
+    • allow 197 hosts from b7cb4c10-fc4f-4f22-a9e6-5b501da575d4, local-policy
+    • deny 1 host from local-policy
+    • fallback: deny when no rule decides from default-deny-all
+
+  FILESYSTEM
+    • read allow all paths from local-policy
+    • write allow all paths from local-policy
+
+    try: sbx policy ls day3 --wide
+
+
+C:\Users\David>sbx policy inspect local-policy
+
+  Policy:      local-policy
+  Policy ID:   local-policy
+  Source:      local
+  Applies to:  all
+  Status:      active
+
+  RULES IN THIS POLICY
+  DECISION   RESOURCE                                                                           TYPE               METHOD   PATH   PROTOCOLS   RULE   STATUS
+  allow      **.chatgpt.com:443                                                                 network            -        -      tcp         -      active
+  allow      **.cursor.sh:443                                                                   network            -        -      tcp         -      active
+  allow      **.factory.ai:443                                                                  network            -        -      tcp         -      active
+  allow      **.oaistatic.com:443                                                               network            -        -      tcp         -      active
+  allow      **.oaiusercontent.com:443                                                          network            -        -      tcp         -      active
+  allow      **.openai.com:443                                                                  network            -        -      tcp         -      active
+  allow      api.anthropic.com:443                                                              network            -        -      tcp         -      active
+  allow      api.perplexity.ai:443                                                              network            -        -      tcp         -      active
+  allow      api.workos.com:443                                                                 network            -        -      tcp         -      active
+  allow      bridge.claudeusercontent.com:443                                                   network            -        -      tcp         -      active
+  allow      cdn.openaimerge.com:443                                                            network            -        -      tcp         -      active
+  allow      chatgpt.com:443                                                                    network            -        -      tcp         -      active
+  allow      claude.com:443                                                                     network            -        -      tcp         -      active
+  allow      cursor.com:443                                                                     network            -        -      tcp         -      active
+  allow      downloads.claude.ai:443                                                            network            -        -      tcp         -      active
+  allow      factory.ai:443                                                                     network            -        -      tcp         -      active
+  allow      gemini.google.com:443                                                              network            -        -      tcp         -      active
+  allow      generativelanguage.googleapis.com:443                                              network            -        -      tcp         -      active
+  allow      mcp-proxy.anthropic.com:443                                                        network            -        -      tcp         -      active
+  allow      models.dev:443                                                                     network            -        -      tcp         -      active
+  allow      platform.claude.com:443                                                            network            -        -      tcp         -      active
+  allow      play.googleapis.com:443                                                            network            -        -      tcp         -      active
+  allow      statsig.anthropic.com:443                                                          network            -        -      tcp         -      active
+  allow      **.bun.sh:443                                                                      network            -        -      tcp         -      active
+  allow      **.gradle.org:443                                                                  network            -        -      tcp         -      active
+  allow      **.packagist.org:443                                                               network            -        -      tcp         -      active
+  allow      **.yarnpkg.com:443                                                                 network            -        -      tcp         -      active
+  allow      apache.org:443                                                                     network            -        -      tcp         -      active
+  allow      astral.sh:443                                                                      network            -        -      tcp         -      active
+  allow      bootstrap.pypa.io:443                                                              network            -        -      tcp         -      active
+  allow      bun.sh:443                                                                         network            -        -      tcp         -      active
+  allow      cocoapods.org:443                                                                  network            -        -      tcp         -      active
+  allow      cpan.org:443                                                                       network            -        -      tcp         -      active
+  allow      crates.io:443                                                                      network            -        -      tcp         -      active
+  allow      deb.nodesource.com:443                                                             network            -        -      tcp         -      active
+  allow      dot.net:443                                                                        network            -        -      tcp         -      active
+  allow      dotnet.microsoft.com:443                                                           network            -        -      tcp         -      active
+  allow      eclipse.org:443                                                                    network            -        -      tcp         -      active
+  allow      files.pythonhosted.org:443                                                         network            -        -      tcp         -      active
+  allow      golang.org:443                                                                     network            -        -      tcp         -      active
+  allow      goproxy.io:443                                                                     network            -        -      tcp         -      active
+  allow      gradle.org:443                                                                     network            -        -      tcp         -      active
+  allow      haskell.org:443                                                                    network            -        -      tcp         -      active
+  allow      hex.pm:443                                                                         network            -        -      tcp         -      active
+  allow      index.crates.io:443                                                                network            -        -      tcp         -      active
+  allow      java.com:443                                                                       network            -        -      tcp         -      active
+  allow      java.net:443                                                                       network            -        -      tcp         -      active
+  allow      maven.org:443                                                                      network            -        -      tcp         -      active
+  allow      metacpan.org:443                                                                   network            -        -      tcp         -      active
+  allow      nodejs.org:443                                                                     network            -        -      tcp         -      active
+  allow      npm.duckdb.org:443                                                                 network            -        -      tcp         -      active
+  allow      npmjs.com:443                                                                      network            -        -      tcp         -      active
+  allow      npmjs.org:443                                                                      network            -        -      tcp         -      active
+  allow      nuget.org:443                                                                      network            -        -      tcp         -      active
+  allow      packagist.com:443                                                                  network            -        -      tcp         -      active
+  allow      packagist.org:443                                                                  network            -        -      tcp         -      active
+  allow      pkg.go.dev:443                                                                     network            -        -      tcp         -      active
+  allow      proxy.golang.org:443                                                               network            -        -      tcp         -      active
+  allow      pub.dev:443                                                                        network            -        -      tcp         -      active
+  allow      pypa.io:443                                                                        network            -        -      tcp         -      active
+  allow      pypi.org:443                                                                       network            -        -      tcp         -      active
+  allow      pypi.python.org:443                                                                network            -        -      tcp         -      active
+  allow      pythonhosted.org:443                                                               network            -        -      tcp         -      active
+  allow      registry.npmjs.org:443                                                             network            -        -      tcp         -      active
+  allow      repo.maven.apache.org:443                                                          network            -        -      tcp         -      active
+  allow      ruby-lang.org:443                                                                  network            -        -      tcp         -      active
+  allow      rubygems.org:443                                                                   network            -        -      tcp         -      active
+  allow      rubyonrails.org:443                                                                network            -        -      tcp         -      active
+  allow      rustup.rs:443                                                                      network            -        -      tcp         -      active
+  allow      rvm.io:443                                                                         network            -        -      tcp         -      active
+  allow      sh.rustup.rs:443                                                                   network            -        -      tcp         -      active
+  allow      spring.io:443                                                                      network            -        -      tcp         -      active
+  allow      static.crates.io:443                                                               network            -        -      tcp         -      active
+  allow      static.rust-lang.org:443                                                           network            -        -      tcp         -      active
+  allow      sum.golang.org:443                                                                 network            -        -      tcp         -      active
+  allow      swift.org:443                                                                      network            -        -      tcp         -      active
+  allow      tuf-repo-cdn.sigstore.dev:443                                                      network            -        -      tcp         -      active
+  allow      yarnpkg.com:443                                                                    network            -        -      tcp         -      active
+  allow      ziglang.org:443                                                                    network            -        -      tcp         -      active
+  allow      **.data.mcr.microsoft.com:443                                                      network            -        -      tcp         -      active
+  allow      **.docker.com:443                                                                  network            -        -      tcp         -      active
+  allow      **.docker.io:443                                                                   network            -        -      tcp         -      active
+  allow      **.gcr.io:443                                                                      network            -        -      tcp         -      active
+  allow      **.github.com:443                                                                  network            -        -      tcp         -      active
+  allow      **.githubcopilot.com:443                                                           network            -        -      tcp         -      active
+  allow      **.githubusercontent.com:443                                                       network            -        -      tcp         -      active
+  allow      **.gitlab.com:443                                                                  network            -        -      tcp         -      active
+  allow      **.production.cloudflare.docker.com:443                                            network            -        -      tcp         -      active
+  allow      **.production.cloudfront.docker.com:443                                            network            -        -      tcp         -      active
+  allow      bitbucket.org:443                                                                  network            -        -      tcp         -      active
+  allow      code.visualstudio.com:443                                                          network            -        -      tcp         -      active
+  allow      d2glxqk2uabbnd.cloudfront.net:443                                                  network            -        -      tcp         -      active
+  allow      dhi.io:443                                                                         network            -        -      tcp         -      active
+  allow      dhi.io:80                                                                          network            -        -      tcp         -      active
+  allow      docker-images-prod.6aa30f8b08e16409b46e0173d6de2f56.r2.cloudflarestorage.com:443   network            -        -      tcp         -      active
+  allow      docker.com:443                                                                     network            -        -      tcp         -      active
+  allow      docker.io:443                                                                      network            -        -      tcp         -      active
+  allow      gcr.io:443                                                                         network            -        -      tcp         -      active
+  allow      ghcr.io:443                                                                        network            -        -      tcp         -      active
+  allow      github.com:443                                                                     network            -        -      tcp         -      active
+  allow      gitlab.com:443                                                                     network            -        -      tcp         -      active
+  allow      k8s.io:443                                                                         network            -        -      tcp         -      active
+  allow      launchpad.net:443                                                                  network            -        -      tcp         -      active
+  allow      mcr.microsoft.com:443                                                              network            -        -      tcp         -      active
+  allow      ppa.launchpad.net:443                                                              network            -        -      tcp         -      active
+  allow      production.cloudflare.docker.com:443                                               network            -        -      tcp         -      active
+  allow      production.cloudfront.docker.com:443                                               network            -        -      tcp         -      active
+  allow      public.ecr.aws:443                                                                 network            -        -      tcp         -      active
+  allow      quay.io:443                                                                        network            -        -      tcp         -      active
+  allow      registry.k8s.io:443                                                                network            -        -      tcp         -      active
+  allow      sourceforge.net:443                                                                network            -        -      tcp         -      active
+  allow      vscode.dev:443                                                                     network            -        -      tcp         -      active
+  allow      vscode.download.prss.microsoft.com:443                                             network            -        -      tcp         -      active
+  allow      **.amazonaws.com:443                                                               network            -        -      tcp         -      active
+  allow      **.blob.core.windows.net:443                                                       network            -        -      tcp         -      active
+  allow      **.googleapis.com:443                                                              network            -        -      tcp         -      active
+  allow      **.googleusercontent.com:443                                                       network            -        -      tcp         -      active
+  allow      **.gstatic.com:443                                                                 network            -        -      tcp         -      active
+  allow      **.gvt1.com:443                                                                    network            -        -      tcp         -      active
+  allow      **.hashicorp.com:443                                                               network            -        -      tcp         -      active
+  allow      **.public.blob.vercel-storage.com:443                                              network            -        -      tcp         -      active
+  allow      **.visualstudio.com:443                                                            network            -        -      tcp         -      active
+  allow      apis.google.com:443                                                                network            -        -      tcp         -      active
+  allow      app.daytona.io:443                                                                 network            -        -      tcp         -      active
+  allow      azure.com:443                                                                      network            -        -      tcp         -      active
+  allow      binaries.prisma.sh:443                                                             network            -        -      tcp         -      active
+  allow      cdn.playwright.dev:443                                                             network            -        -      tcp         -      active
+  allow      challenges.cloudflare.com:443                                                      network            -        -      tcp         -      active
+  allow      clerk.com:443                                                                      network            -        -      tcp         -      active
+  allow      csp.withgoogle.com:443                                                             network            -        -      tcp         -      active
+  allow      dev.azure.com:443                                                                  network            -        -      tcp         -      active
+  allow      dl.google.com:443                                                                  network            -        -      tcp         -      active
+  allow      fastly.com:443                                                                     network            -        -      tcp         -      active
+  allow      figma.com:443                                                                      network            -        -      tcp         -      active
+  allow      hashicorp.com:443                                                                  network            -        -      tcp         -      active
+  allow      jsdelivr.net:443                                                                   network            -        -      tcp         -      active
+  allow      json-schema.org:443                                                                network            -        -      tcp         -      active
+  allow      json.schemastore.org:443                                                           network            -        -      tcp         -      active
+  allow      login.microsoftonline.com:443                                                      network            -        -      tcp         -      active
+  allow      mise-versions.jdx.dev:443                                                          network            -        -      tcp         -      active
+  allow      mise.run:443                                                                       network            -        -      tcp         -      active
+  allow      packages.microsoft.com:443                                                         network            -        -      tcp         -      active
+  allow      play.google.com:443                                                                network            -        -      tcp         -      active
+  allow      playwright.azureedge.net:443                                                       network            -        -      tcp         -      active
+  allow      supabase.com:443                                                                   network            -        -      tcp         -      active
+  allow      unpkg.com:443                                                                      network            -        -      tcp         -      active
+  allow      vercel.com:443                                                                     network            -        -      tcp         -      active
+  allow      visualstudio.com:443                                                               network            -        -      tcp         -      active
+  allow      www.google.com:443                                                                 network            -        -      tcp         -      active
+  allow      **.debian.org:443                                                                  network            -        -      tcp         -      active
+  allow      alpinelinux.org:443                                                                network            -        -      tcp         -      active
+  allow      apt.llvm.org:443                                                                   network            -        -      tcp         -      active
+  allow      archive.ubuntu.com:443                                                             network            -        -      tcp         -      active
+  allow      archive.ubuntu.com:80                                                              network            -        -      tcp         -      active
+  allow      archlinux.org:443                                                                  network            -        -      tcp         -      active
+  allow      centos.org:443                                                                     network            -        -      tcp         -      active
+  allow      debian.org:443                                                                     network            -        -      tcp         -      active
+  allow      dl-cdn.alpinelinux.org:443                                                         network            -        -      tcp         -      active
+  allow      fedoraproject.org:443                                                              network            -        -      tcp         -      active
+  allow      packagecloud.io:443                                                                network            -        -      tcp         -      active
+  allow      ports.ubuntu.com:443                                                               network            -        -      tcp         -      active
+  allow      ports.ubuntu.com:80                                                                network            -        -      tcp         -      active
+  allow      security.ubuntu.com:443                                                            network            -        -      tcp         -      active
+  allow      security.ubuntu.com:80                                                             network            -        -      tcp         -      active
+  allow      ubuntu.com:443                                                                     network            -        -      tcp         -      active
+  allow      **.amazontrust.com:443                                                             network            -        -      tcp         -      active
+  allow      **.amazontrust.com:80                                                              network            -        -      tcp         -      active
+  allow      **.lencr.org:443                                                                   network            -        -      tcp         -      active
+  allow      **.lencr.org:80                                                                    network            -        -      tcp         -      active
+  allow      **.pki.goog:443                                                                    network            -        -      tcp         -      active
+  allow      **.pki.goog:80                                                                     network            -        -      tcp         -      active
+  allow      **.pki.microsoft.com:443                                                           network            -        -      tcp         -      active
+  allow      **.pki.microsoft.com:80                                                            network            -        -      tcp         -      active
+  allow      *.one.au.digicert.com:80                                                           network            -        -      tcp         -      active
+  allow      *.one.ch.digicert.com:80                                                           network            -        -      tcp         -      active
+  allow      *.one.digicert.co.jp:80                                                            network            -        -      tcp         -      active
+  allow      *.one.digicert.com:80                                                              network            -        -      tcp         -      active
+  allow      *.one.nl.digicert.com:80                                                           network            -        -      tcp         -      active
+  allow      cacerts.digicert.com:80                                                            network            -        -      tcp         -      active
+  allow      crl*.digicert.com:80                                                               network            -        -      tcp         -      active
+  allow      crl.comodoca.com:80                                                                network            -        -      tcp         -      active
+  allow      crl.globalsign.com:80                                                              network            -        -      tcp         -      active
+  allow      crl.globalsign.net:80                                                              network            -        -      tcp         -      active
+  allow      crl.sectigo.com:80                                                                 network            -        -      tcp         -      active
+  allow      crl.usertrust.com:80                                                               network            -        -      tcp         -      active
+  allow      crt.sectigo.com:80                                                                 network            -        -      tcp         -      active
+  allow      isrg.trustid.ocsp.identrust.com:80                                                 network            -        -      tcp         -      active
+  allow      ocsp.comodoca.com:80                                                               network            -        -      tcp         -      active
+  allow      ocsp.digicert.com:80                                                               network            -        -      tcp         -      active
+  allow      ocsp.globalsign.com:443                                                            network            -        -      tcp         -      active
+  allow      ocsp.globalsign.com:80                                                             network            -        -      tcp         -      active
+  allow      ocsp.sectigo.com:80                                                                network            -        -      tcp         -      active
+  allow      ocsp.usertrust.com:80                                                              network            -        -      tcp         -      active
+  allow      ocsp2.globalsign.com:443                                                           network            -        -      tcp         -      active
+  allow      ocsp2.globalsign.com:80                                                            network            -        -      tcp         -      active
+  allow      **                                                                                 filesystem:read    -        -      -           -      active
+  allow      **                                                                                 filesystem:write   -        -      -           -      active
+  allow      cdn.playwright.dev                                                                 network            -        -      tcp         -      active
+  deny       api.github.com                                                                     network            -        -      tcp,udp     -      active
+
+  RULE IDS
+  RULE   RULE_ID                                EDITABLE   ACTION
+  -      default-ai-services                    yes        sbx policy rm network --id default-ai-services
+  -      default-package-managers               yes        sbx policy rm network --id default-package-managers
+  -      default-code-and-containers            yes        sbx policy rm network --id default-code-and-containers
+  -      default-cloud-infrastructure           yes        sbx policy rm network --id default-cloud-infrastructure
+  -      default-os-packages                    yes        sbx policy rm network --id default-os-packages
+  -      default-cert-validation                yes        sbx policy rm network --id default-cert-validation
+  -      default-fs-read-allow-all              no         filesystem rules cannot be modified with the CLI
+  -      default-fs-write-allow-all             no         filesystem rules cannot be modified with the CLI
+  -      f82da8c1-b50b-4c1d-836a-648c8a2d6dfe   yes        sbx policy rm network --id f82da8c1-b50b-4c1d-836a-648c8a2d6dfe
+  -      b377f68c-342b-44c9-95e6-b8dc4d4a713d   yes        sbx policy rm network --id b377f68c-342b-44c9-95e6-b8dc4d4a713d
+
+
+C:\Users\David>sbx policy inspect default-cloud-infrastructure
+
+  Rule:         default-cloud-infrastructure
+  Rule ID:      default-cloud-infrastructure
+  Policy:       local-policy
+  Policy ID:    local-policy
+  Source:       local
+  Created via:  default
+  Applies to:   all
+  Type:         network
+  Decision:     allow
+  Protocols:    tcp
+  Action:       net:connect:tcp
+  Status:       active
+  Editable:     yes
+  Remove:       sbx policy rm network --id default-cloud-infrastructure
+
+  RESOURCES (36)
+    • **.amazonaws.com:443
+    • **.blob.core.windows.net:443
+    • **.googleapis.com:443
+    • **.googleusercontent.com:443
+    • **.gstatic.com:443
+    • **.gvt1.com:443
+    • **.hashicorp.com:443
+    • **.public.blob.vercel-storage.com:443
+    • **.visualstudio.com:443
+    • apis.google.com:443
+    • app.daytona.io:443
+    • azure.com:443
+    • binaries.prisma.sh:443
+    • cdn.playwright.dev:443
+    • challenges.cloudflare.com:443
+    • clerk.com:443
+    • csp.withgoogle.com:443
+    • dev.azure.com:443
+    • dl.google.com:443
+    • fastly.com:443
+    • figma.com:443
+    • hashicorp.com:443
+    • jsdelivr.net:443
+    • json-schema.org:443
+    • json.schemastore.org:443
+    • login.microsoftonline.com:443
+    • mise-versions.jdx.dev:443
+    • mise.run:443
+    • packages.microsoft.com:443
+    • play.google.com:443
+    • playwright.azureedge.net:443
+    • supabase.com:443
+    • unpkg.com:443
+    • vercel.com:443
+    • visualstudio.com:443
+    • www.google.com:443
+
+
+C:\Users\David>sbx policy rm network --id default-cloud-infrastructure
+
+  Remove network rules from global (id=default-cloud-infrastructure)? (y/N) y
+
+  Removed rule from policy local: id=default-cloud-infrastructure
+
+
+C:\Users\David>sbx policy check network s3.amazonaws.com:443
+
+    Denied:      s3.amazonaws.com:443
+    Governance:  Local policy only
+    Context:     global
+    Reason:      no matching allow rule (default deny)
+
+
+C:\Users\David>sbx policy check network cdn.playwright.dev:443
+
+    Allowed:     cdn.playwright.dev:443
+    Governance:  Local policy only
+    Context:     global
+    Rule:        f82da8c1-b50b-4c1d-836a-648c8a2d6dfe
+
+
+C:\Users\David>sbx policy allow network cdn.playwright.dev
+
+  Already covered in policy local (scope: global): cdn.playwright.dev [tcp] (by rule "f82da8c1-b50b-4c1d-836a-648c8a2d6dfe")
+
+
+C:\Users\David>sbx policy check network cdn.playwright.dev:443
+
+    Allowed:     cdn.playwright.dev:443
+    Governance:  Local policy only
+    Context:     global
+    Rule:        f82da8c1-b50b-4c1d-836a-648c8a2d6dfe
+
+
+C:\Users\David>sbx policy deny network api.github.com
+
+  Already covered in policy local (scope: global): api.github.com [tcp,udp] (by rule "b377f68c-342b-44c9-95e6-b8dc4d4a713d")
+
+
+C:\Users\David>sbx policy ls
+
+  POLICY                                 SOURCE   APPLIES TO     SUMMARY
+  b7cb4c10-fc4f-4f22-a9e6-5b501da575d4   kit      sandbox:day3   network: 8 allow
+  default-deny-all                       local    all            network: deny when no rule decides
+  local-policy                           local    all            network: 160 allow, 1 deny; filesystem read: 1 allow; filesystem write: 1 allow
+
+
+C:\Users\David>sbx policy ls --wide --created-via added
+
+  SOURCE   CREATED VIA   APPLIES TO   POLICY   POLICY_ID      RULE   RULE_ID                                TYPE      METHOD   PATH   DECISION   PROTOCOLS   RESOURCES
+  local    added         all          -        local-policy   -      f82da8c1-b50b-4c1d-836a-648c8a2d6dfe   network   -        -      allow      tcp         cdn.playwright.dev
+                                                                                                      
+  local    added         all          -        local-policy   -      b377f68c-342b-44c9-95e6-b8dc4d4a713d   network   -        -      deny       tcp,udp     api.github.com
+
+
+C:\Users\David>sbx policy rm network --resource api.github.com
+
+  Remove network rules from global (resources=api.github.com)? (y/N) y
+
+  Removed rule from policy local: resources=api.github.com
+
+
+C:\Users\David>sbx policy deny network default-cloud-infrastructure
+
+  Added rule ee45e89d-81a0-46f6-b680-267709086d83 to policy local (scope: global): default-cloud-infrastructure [tcp,udp]
+
+
+C:\Users\David>sbx policy rm --help
+
+  Description:
+    Remove a previously added allow or deny rule.
+
+  Usage:
+    sbx policy rm COMMAND
+
+  Aliases:
+    rm, remove, delete
+
+  Available Commands:
+    network     Remove a network rule
+
+  Flags:
+    -h, --help   help for rm
+
+  Global Flags:
+        --cloud      Dispatch to Docker Cloud Sandboxes API instead of local sandboxd (supported by a growing set of verbs — run 'sbx --cloud --help' for the current list)
+    -D, --debug      Enable debug logging
+        --no-input   Never prompt; commands that need an answer fail with the command to run instead
+
+  Use "sbx policy rm COMMAND --help" for more information about a command.
+
+
+C:\Users\David>

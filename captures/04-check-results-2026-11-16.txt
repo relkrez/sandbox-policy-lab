@@ -1,0 +1,95 @@
+Check results pasted by David on Nov. 16, 2026, sbx v0.54.0, Windows 11, Command Prompt.
+Copied from the working session. Each block notes the policy state it was run in.
+
+=== State: clean Balanced preset ===
+
+C:\Users\David>sbx version
+
+  sbx version v0.54.0 4bec4a5ce093466e54b034146965b143d065dc09
+
+C:\Users\David>sbx policy check network s3.amazonaws.com:443
+
+    Allowed:     s3.amazonaws.com:443
+    Governance:  Local policy only
+    Context:     global
+    Rule:        default-cloud-infrastructure
+
+C:\Users\David>sbx policy check network paste.example.com:443
+
+    Denied:      paste.example.com:443
+    Governance:  Local policy only
+    Context:     global
+    Reason:      no matching allow rule (default deny)
+
+C:\Users\David>sbx policy check network --sandbox day3 api.anthropic.com:443
+
+    Allowed:     api.anthropic.com:443
+    Governance:  Local policy only
+    Context:     sandbox:day3
+    Rule:        default-ai-services
+
+=== State: default-ai-services removed, plus a deny rule for api.github.com ===
+
+C:\Users\David>sbx policy rm network --id default-ai-services
+
+  Remove network rules from global (id=default-ai-services)? (y/N) y
+
+  Removed rule from policy local: id=default-ai-services
+
+C:\Users\David>sbx policy check network pypi.org:80
+
+    Denied:      pypi.org:80
+    Governance:  Local policy only
+    Context:     global
+    Reason:      no matching allow rule (default deny)
+
+C:\Users\David>sbx policy check network api.github.com
+
+    Denied:      api.github.com:443
+    Governance:  Local policy only
+    Context:     global
+    Reason:      denied by local rule rule "local:7f19b6cd-c86b-4c9a-90e4-59d98ad7f416"
+
+C:\Users\David>sbx policy check network api.anthropic.com:443
+
+    Denied:      api.anthropic.com:443
+    Governance:  Local policy only
+    Context:     global
+    Reason:      no matching allow rule (default deny)
+
+C:\Users\David>sbx policy check network --sandbox day3 api.anthropic.com:443
+
+    Allowed:     api.anthropic.com:443
+    Governance:  Local policy only
+    Context:     sandbox:day3
+    Rule:        kit:day3
+
+C:\Users\David>sbx policy check network amazonaws.com:443
+
+    Allowed:     amazonaws.com:443
+    Governance:  Local policy only
+    Context:     global
+    Rule:        default-cloud-infrastructure
+
+=== Wildcard checks (cert group unchanged) ===
+
+C:\Users\David>sbx policy check network one.digicert.com:80
+
+    Denied:      one.digicert.com:80
+    Governance:  Local policy only
+    Context:     global
+    Reason:      no matching allow rule (default deny)
+
+C:\Users\David>sbx policy check network x.one.digicert.com:80
+
+    Allowed:     x.one.digicert.com:80
+    Governance:  Local policy only
+    Context:     global
+    Rule:        default-cert-validation
+
+C:\Users\David>sbx policy check network a.b.one.digicert.com:80
+
+    Denied:      a.b.one.digicert.com:80
+    Governance:  Local policy only
+    Context:     global
+    Reason:      no matching allow rule (default deny)

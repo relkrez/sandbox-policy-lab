@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harden a local sandbox policy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: one reading column, 68ch, exercises set off as bordered panels on the same column */
+:root {
+  --bg: #f3f6f5; --surface: #ffffff; --ink: #17211f; --muted: #55635f; --line: #d3dbd8;
+  --accent: #0b6b5c; --accent-soft: #dcefe9;
+  --ok: #1b6630; --ok-bg: #e2f3e6; --no: #9e2a2a; --no-bg: #fbe7e5; --warn: #6f4b00; --warn-bg: #fbf0d4;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #101615; --surface: #18201e; --ink: #e6ecea; --muted: #9ba9a5; --line: #2c3734;
+    --accent: #62d1ba; --accent-soft: #16302b;
+    --ok: #82d595; --ok-bg: #15301c; --no: #f19c96; --no-bg: #3a1b19; --warn: #e9c26d; --warn-bg: #33290f;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #101615; --surface: #18201e; --ink: #e6ecea; --muted: #9ba9a5; --line: #2c3734;
+  --accent: #62d1ba; --accent-soft: #16302b;
+  --ok: #82d595; --ok-bg: #15301c; --no: #f19c96; --no-bg: #3a1b19; --warn: #e9c26d; --warn-bg: #33290f;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 18px; line-height: 1.6; }
+main { max-width: 46rem; margin: 0 auto; padding: 2rem 1.25rem 5rem; display: flex; flex-direction: column; gap: 2.75rem; }
+section { display: flex; flex-direction: column; gap: 1rem; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: 2.3rem; font-weight: 650; }
+h2 { font-size: 1.55rem; font-weight: 650; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+h3 { font-size: 1.1rem; font-weight: 500; }
+p, ul, ol { margin: 0; }
+ul, ol { padding-left: 1.3rem; display: flex; flex-direction: column; gap: 0.35rem; }
+code, pre, .mono { font-family: var(--mono); font-size: 0.86em; }
+code { background: var(--accent-soft); padding: 0.08em 0.32em; border-radius: 4px; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+.eyebrow { font-size: 0.9rem; color: var(--muted); }
+.draft { background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 0.6rem 0.9rem; font-size: 0.95rem; }
+.lede { font-size: 1.15rem; }
+.meta { color: var(--muted); font-size: 0.95rem; }
+.team { border-left: 4px solid var(--accent); padding: 0.2rem 0 0.2rem 1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.ex { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+.ex-tag { font-size: 0.85rem; color: var(--accent); font-weight: 600; }
+.opts { display: flex; flex-direction: column; gap: 0.5rem; }
+.opts label, .inline label { display: flex; gap: 0.6rem; align-items: flex-start; cursor: pointer; }
+.inline { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; }
+input[type="checkbox"], input[type="radio"] { width: 1.1rem; height: 1.1rem; margin-top: 0.3rem; accent-color: var(--accent); flex: none; }
+button { font: inherit; font-weight: 600; background: var(--accent); color: var(--surface); border: 0; border-radius: 8px; padding: 0.5rem 1rem; cursor: pointer; }
+button.quiet { background: transparent; color: var(--accent); border: 1px solid var(--line); font-weight: 400; padding: 0.3rem 0.7rem; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+input[type="text"], select, textarea { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 0.45rem 0.6rem; max-width: 100%; }
+textarea { width: 100%; min-height: 9rem; resize: vertical; }
+.row { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.err { color: var(--no); font-size: 0.95rem; }
+.fb { border-radius: 8px; padding: 0.7rem 0.9rem; }
+.fb.ok { background: var(--ok-bg); color: var(--ok); }
+.fb.no { background: var(--no-bg); color: var(--no); }
+.fb.warn { background: var(--warn-bg); color: var(--warn); }
+.fb .why { color: var(--ink); }
+.cli { font-family: var(--mono); font-size: 0.82rem; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 0.7rem 0.9rem; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+.case, .group, .term { border-top: 1px solid var(--line); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.case:first-of-type, .group:first-of-type, .term:first-of-type { border-top: 0; padding-top: 0; }
+.group-head { display: flex; flex-wrap: wrap; gap: 0.3rem 0.8rem; align-items: baseline; }
+.count { color: var(--muted); font-size: 0.9rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sim-col select#sim-context { width: 100%; }
+.chips button { font-family: var(--body); }
+details summary { cursor: pointer; color: var(--accent); }
+.rules { columns: 2 14rem; column-gap: 1.5rem; font-family: var(--mono); font-size: 0.78rem; padding: 0.6rem 0 0; margin: 0; list-style: none; display: block; }
+.rules li { overflow-wrap: anywhere; break-inside: avoid; }
+.sim-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.25rem; }
+.sim-col { display: flex; flex-direction: column; gap: 0.7rem; min-width: 0; }
+.chips { display: flex; flex-direction: column; gap: 0.35rem; padding: 0; list-style: none; }
+.chips li { display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: 0.8rem; }
+.steps li { padding-left: 0.2rem; }
+table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tablewrap { overflow-x: auto; }
+@media (prefers-reduced-motion: no-preference) { button { transition: transform 0.08s; } button:active { transform: scale(0.98); } }
+</style>
+
+<style>
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.6rem; text-decoration: none; color: var(--ink); }
+.card:hover { border-color: var(--accent); }
+.card .go { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<header style="display:flex;flex-direction:column;gap:1rem;">
+  <p class="eyebrow">A sample course on Docker Sandboxes network policy</p>
+  <h1>Harden a local sandbox policy</h1>
+  <p class="lede">Decide what your team's AI agents can reach from a Docker sandbox, change the policy to match, and verify that every change did what you intended.</p>
+  <p class="meta">Two lessons, about an hour in total. Tested on <code>sbx</code> v0.54.0.</p>
+</header>
+<section>
+  <h2>The lessons</h2>
+  <div class="cards">
+    <a class="card" href="lesson-1.html"><span class="eyebrow">Lesson 1 · Reasoning · 30 minutes</span><h3>Decide what a sandbox can reach</h3><p>How a request is decided, what the Balanced preset allows, and what each change costs. Plain language, no install.</p><span class="go">Start Lesson 1</span></a>
+    <a class="card" href="lesson-2.html"><span class="eyebrow">Lesson 2 · Hands-on lab · 30 minutes</span><h3>Change and verify a sandbox policy</h3><p>Apply the decision in your own terminal with <code>sbx policy</code>, predict each result, and prove the outcome with a check script.</p><span class="go">Start Lesson 2</span></a>
+  </div>
+</section>
+<section>
+  <h2>Who this course is for</h2>
+  <p>Admins and security staff who set or review sandbox policy. Some learners can already run a CLI and need the judgment. Others can already judge risk and need the commands. The two lessons serve both.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Course</th><th>For</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Request sandbox access</td><td>People new to sandboxes who need to recognize a block and ask for access</td><td>Recommended prerequisite. Not part of this sample</td></tr>
+      <tr><td>Harden a local sandbox policy</td><td>Admins and security staff</td><td>This course</td></tr>
+      <tr><td>Govern sandboxes across an organization</td><td>Experienced admins who enforce, automate, and audit policy at scale</td><td>Advanced. Not part of this sample</td></tr>
+    </tbody>
+  </table></div>
+  <p>The course assumes its learning plan has already installed <code>sbx</code> and created one sandbox that uses the Claude Code kit.</p>
+</section>
+<section>
+  <h2>How this course stays current</h2>
+  <p>Each claim in the course is traced to a heading in Docker's documentation or to a result tested on a real machine. When the documentation changes, a workflow judges whether the change affects the course, drafts a revision of the affected sections, and opens a pull request. A subject-matter expert reviews every pull request before anything is published.</p>
+  <p>The revision history is in the <code>refresh-log</code> folder of this course's repository.</p>
+  <p class="meta">This is an independent sample. It isn't affiliated with or endorsed by Docker.</p>
+</section>
+</main>
+</body>
+</html>
