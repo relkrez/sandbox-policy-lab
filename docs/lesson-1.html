@@ -183,7 +183,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 <!-- BEGIN section:s1 -->
 <section id="s1">
   <p class="sec-no">Section 1</p>
-  <h2>A sandbox's rules decide which destinations an agent can reach</h2>
+  <h2>A sandbox's rules decide which hostnames an agent can reach, but a blocked host that shares an address with an allowed host can still be reached</h2>
   <p>Every request an agent sends out of a sandbox passes a checkpoint on the machine. The checkpoint compares the request to a list of rules. Each rule names a destination and says allow or deny.</p>
   <div class="flow" role="img" aria-label="Decision order: a matching deny rule blocks the request. Otherwise a matching allow rule lets it through. Otherwise the fallback blocks it.">
     <div class="flow-start">A request leaves the sandbox</div>
@@ -194,6 +194,13 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <div class="flow-row"><div class="flow-q">No rule matches</div><div class="flow-yes">→</div><div class="flow-a no">Blocked by the fallback. The sandbox asks you to approve the destination.</div></div>
   </div>
   <p>A destination is a host and a port together. <code>pypi.org</code> on port 443 and <code>pypi.org</code> on port 80 are two different destinations, and a rule for one says nothing about the other.</p>
+  <p>Every decision is about the hostname the checkpoint attributes to a connection, not the address behind it. When a deny rule wins over an allow rule, it blocks that name. In local sandboxes, two hosts can share one address. So a host you block, such as <code>api.github.com</code>, can still be reachable if it shares an address with a host you allow. This can happen in three cases:</p>
+  <ul>
+    <li>The connection is encrypted and the checkpoint doesn't decrypt it. The checkpoint doesn't check the hostname written inside the encrypted traffic.</li>
+    <li>An unencrypted connection goes through a tunnel or doesn't use the sandbox's proxy setting. The checkpoint checks only the first request's hostname. Later requests on the same connection aren't checked.</li>
+    <li>A connection names no host. The checkpoint uses an allowed hostname the sandbox looked up for that address, even if another hostname for the same address is blocked.</li>
+  </ul>
+  <p class="note">Draft note: The upstream docs describe these limitations but don't say what a learner should do about them. The writing rules ask for "what to do" after "what the product doesn't control." Please confirm whether there's documented guidance to add here, or whether the lesson should leave it out.</p>
 
   <div class="ex" id="sim">
     <span class="ex-tag">Try it · The rules on Priya's machine</span>
@@ -228,6 +235,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
       </div>
     </div>
   </div>
+  <p class="note">Draft note: The simulator shows the decision for a hostname only. It doesn't model shared addresses, so step three will show <code>api.github.com</code> as blocked. That matches the new text, because the decision is about the name, but please confirm the simulator's result message doesn't promise the host is unreachable. I didn't change any script.</p>
 
   <div class="ex">
     <span class="ex-tag">Exercise 1 · Trace four requests</span>
@@ -282,9 +290,16 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <tbody>
       <tr><td>Remove a group</td><td>Every destination that only that group allowed is now blocked. That includes destinations you didn't know were in it.</td></tr>
       <tr><td>Allow a host</td><td>That one destination is reachable again, and nothing else is.</td></tr>
-      <tr><td>Deny a host</td><td>That destination is blocked, even when a group or a kit allows it.</td></tr>
+      <tr><td>Deny a host</td><td>The checkpoint blocks connections that name that destination, even when a group or a kit allows it. In a local sandbox, a blocked host that shares a network address with an allowed host can still be reached in a few cases.</td></tr>
     </tbody>
   </table></div>
+  <p>The checkpoint decides by the name a connection gives for where it's going, not by the network address behind that name. In a local sandbox, a blocked host that shares an address with an allowed host can still be reached in three cases:</p>
+  <ul>
+    <li>On a connection the checkpoint doesn't decrypt, it can't check the name written inside the encrypted traffic.</li>
+    <li>On some unencrypted connections, the checkpoint checks the name in the first request only. Later requests on the same connection aren't checked.</li>
+    <li>When a connection doesn't name a host, the checkpoint uses an allowed name that the sandbox looked up for that address, even if another name for the same address is blocked.</li>
+  </ul>
+  <p class="note">Draft note: The upstream docs don't say what to do about these cases, so this draft doesn't give the learner a next step. The exercises below don't test the new limitation. Please confirm whether a "what to do" line or a question is wanted.</p>
   <p>The kit policy stays in place whatever you remove from the local policy.</p>
 
   <div class="ex" id="cons">
@@ -376,6 +391,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <span class="ex-tag">Stretch · Optional</span>
     <p>A second team builds a Node.js web app and deploys it to AWS. Write their reply. Start from what would break.</p>
   </div>
+  <p class="note">Draft note: The upstream change says that in local sandboxes, a blocked host that shares an IP address with an allowed host can still be reached. I checked every line of the model reply and none of them says a blocking rule guarantees the team can't reach a host. The reply removes allow groups and names one remaining risk, but it never promises that the removed hosts are unreachable. So I left the reply, the rubric, and the stretch exercise as they are. If the reply should name shared IP addresses as a second risk in its last line, tell me and I'll add a sentence based on L1-S3-3.</p>
 </section>
 <!-- END section:assess -->
 
