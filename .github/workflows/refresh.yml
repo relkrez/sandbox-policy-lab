@@ -17,6 +17,8 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    env:
+      BRANCH: refresh/run-${{ github.run_number }}
     steps:
       # 1. Get this repository: the lessons, the source map, the prompts.
       - name: Check out the course
@@ -38,7 +40,6 @@ jobs:
       - name: Open a pull request
         env:
           GH_TOKEN: ${{ github.token }}
-          BRANCH: refresh/run-${{ github.run_number }}
           BASE: ${{ github.event.repository.default_branch }}
         run: |
           git config user.name "github-actions[bot]"
