@@ -73,17 +73,19 @@ def fill(template, values):
     return template
 
 
-def ask_claude(prompt, max_tokens):
+def ask_claude(prompt, max_tokens, earlier=None):
     """Send one prompt to the Claude Messages API.
 
     Returns the reply text and the stop reason. A stop reason of "max_tokens"
-    means the reply was cut off before it finished.
+    means the reply was cut off before it finished. `earlier` is an optional
+    list of earlier messages in the same conversation, sent before the prompt.
     """
+    messages = list(earlier or []) + [{"role": "user", "content": prompt}]
     body = json.dumps(
         {
             "model": MODEL,
             "max_tokens": max_tokens,
-            "messages": [{"role": "user", "content": prompt}],
+            "messages": messages,
         }
     ).encode("utf-8")
     request = urllib.request.Request(
@@ -228,6 +230,27 @@ def triage(commit_meta, diff, rubric, source_map_text):
     result = parse_json_reply(reply)
     if result is not None:
         return result
+
+    # The reply wasn't readable. Ask Claude once to send the same decision
+    # again as valid JSON, before falling back to a manual review.
+    if not MOCK and stop_reason != "max_tokens":
+        print("The triage reply wasn't readable as JSON. Asking Claude to correct it once.")
+        retry, retry_stop = ask_claude(
+            "Your reply above isn't valid JSON, so the workflow can't read it. "
+            "Send the same decision again as one valid JSON object, with the same keys "
+            "and the same values. Don't change your decision. Reply with the JSON object only.",
+            TRIAGE_MAX_TOKENS,
+            earlier=[{"role": "user", "content": prompt}, {"role": "assistant", "content": reply}],
+        )
+        result = parse_json_reply(retry)
+        if result is not None:
+            result["reasoning"] = (
+                result.get("reasoning", "")
+                + " (Claude's first reply wasn't valid JSON. It was asked once to resend the same decision, and this is that reply.)"
+            ).strip()
+            return result
+        reply, stop_reason = reply + "\n\n--- Second reply ---\n" + retry, retry_stop
+
     cause = (
         "The reply was cut off at the token limit before it finished."
         if stop_reason == "max_tokens"
