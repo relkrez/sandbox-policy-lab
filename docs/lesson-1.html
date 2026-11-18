@@ -139,7 +139,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <h3>A helpful agent and a team offsite</h3>
     <p>Priya asks the office's AI agent to find the cheapest way to get 12 people to the team offsite, then joins her 9:00 meeting. By 9:30, the agent has bought a retired school bus at auction, booked the intern a commercial driving test, and sold 41 spare seats online. Its summary reads: "Travel is booked and profitable. We are also now a bus company."</p>
     <p>Nobody told the agent to do any of this, and nothing was set up to stop it. Your agents write code, not bus timetables, but the principle is the same: an agent reaches whatever it's allowed to reach.</p>
-    <p class="promise">This course will teach you to spot and stop this problem in time.</p>
+    <p class="promise">This course teaches you to spot and stop an agent that reaches too far.</p>
   </div>
 </section>
 <!-- END section:story -->
@@ -159,7 +159,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 <section id="before">
   <h2>Before you start</h2>
   <p>This lesson runs in your browser. You don't need to install anything, and none of the exercises change your machine.</p>
-  <p>You'll get the most from it if you can explain what a host and a port are. If sandboxes are new to you, read Docker's <a href="https://docs.docker.com/learn/content/what-is-a-sandbox/">What is a sandbox?</a> first. It takes about six minutes.</p>
+  <p>If sandboxes are new to you, read Docker's <a href="https://docs.docker.com/learn/content/what-is-a-sandbox/">What is a sandbox?</a> first. It takes about six minutes.</p>
 </section>
 <!-- END section:before -->
 
@@ -204,7 +204,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 
   <div class="ex" id="sim">
     <span class="ex-tag">Try it · The rules on Priya's machine</span>
-    <p>These are the real starting rules on Priya's machine: 195 allow rules in six groups. Switch a group off, add a rule of your own, then check a destination.</p>
+    <p>Priya's machine starts with the Balanced preset, which Section 2 covers in detail. For now, Balanced means two things: anything not specifically allowed is denied, and 195 destinations are specifically allowed, in six groups. You can remove a whole group, or allow or deny a single destination. Switch a group off, add a rule of your own, then check a destination.</p>
     <div class="sim-grid">
       <div class="sim-col">
         <h3>Rule groups in force</h3>
@@ -228,7 +228,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
         <div class="result" id="sim-out" aria-live="polite"></div>
         <h3>Try these</h3>
         <ol>
-          <li>Check <code>s3.amazonaws.com:443</code>. Switch off Cloud infrastructure and check again.</li>
+          <li>Check <code>s3.amazonaws.com:443</code>. Switch off Cloud infrastructure and check again. Keep Cloud infrastructure off, add an allow rule for <code>s3.amazonaws.com:443</code>, and check again.</li>
           <li>Check <code>pypi.org:443</code>, then <code>pypi.org:80</code>.</li>
           <li>Add a deny rule for <code>api.github.com</code>, then check it.</li>
         </ol>
@@ -257,7 +257,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
       <tr><td>Locked Down</td><td>Everything is blocked until you or a kit allows it.</td></tr>
     </tbody>
   </table></div>
-  <p>Priya chose Balanced. Her machine now has three policies.</p>
+  <p>Priya chose Balanced. That fills her local policy (<code>local-policy</code>) with 195 allow rules and sets the fallback (<code>default-deny-all</code>) to deny. Because her sandbox runs Claude Code, a third policy arrives with the Claude Code kit.</p>
   <div class="cards">
     <div class="card"><h3>The local policy</h3><span class="id mono">local-policy</span><p>Holds the preset's 195 allow rules, in six groups, plus any rule you add. You can change it. It applies to every sandbox on the machine.</p></div>
     <div class="card"><h3>The fallback</h3><span class="id mono">default-deny-all</span><p>One rule. It blocks any request that no other rule decides. It never overrides an allow rule, and you can't change it.</p></div>
@@ -296,7 +296,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 
   <div class="ex" id="cons">
     <span class="ex-tag">Try it · Harden Priya's policy without breaking her work</span>
-    <p>Change the policy until nothing the team needs is broken and nothing unneeded is still open.</p>
+    <p>Switch on only the groups the team needs. The agent should be able to do everything on the list, with as little else open as possible.</p>
     <div class="sim-grid">
       <div class="sim-col">
         <h3>Rule groups in force</h3>
@@ -356,40 +356,11 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 </section>
 <!-- END section:s4 -->
 
-<!-- BEGIN section:assess -->
-<section id="assess">
-  <h2>Write your reply to Priya</h2>
-  <p>Priya asked you to review her policy, change what should change, and explain why. Write the message you'd send her. Say what you changed, what you left alone, and the reason for each.</p>
-  <div class="ex">
-    <span class="ex-tag">Assessment</span>
-    <label for="assess-text">Your reply</label>
-    <textarea id="assess-text" placeholder="Priya, I removed the cloud infrastructure group because we have no cloud account."></textarea>
-    <div class="row"><button type="button" id="assess-btn">Compare with a model reply</button><span class="err" id="assess-err" role="alert"></span></div>
-    <div id="assess-fb" hidden>
-      <div class="fb ok" style="display:flex;flex-direction:column;gap:0.6rem;">
-        <span>Model reply</span>
-        <span class="why">Priya, I changed two things on your machine and left four alone.</span>
-        <span class="why">I removed the Cloud infrastructure group. We have no cloud account, and three of its rules allowed any storage bucket on AWS, Google Cloud, and Azure. I allowed <code>cdn.playwright.dev</code> again so your browser tests can still download what they need.</span>
-        <span class="why">I removed the AI services group. The Claude Code kit already allows what Claude Code needs. If it stops working, tell me.</span>
-        <span class="why">I kept Package managers, Code and containers, OS packages, and Certificate validation. You need them for Python packages, GitHub, system tools, and secure connections.</span>
-        <span class="why">One risk stays. GitHub is allowed, so an agent can still send data to a repository or gist.</span>
-      </div>
-      <p style="margin-top:1rem;">Score your reply against the model. Tick each line that's true of what you wrote.</p>
-      <div class="opts" id="rubric" style="margin-top:0.6rem;"></div>
-      <p id="rubric-score" class="meta" style="margin-top:0.6rem;" aria-live="polite"></p>
-    </div>
-  </div>
-  <div class="ex">
-    <span class="ex-tag">Stretch · Optional</span>
-    <p>A second team builds a Node.js web app and deploys it to AWS. Write their reply. Start from what would break.</p>
-  </div>
-</section>
-<!-- END section:assess -->
 
 <!-- BEGIN section:next -->
 <section id="next">
   <h2>Next: change and verify the policy</h2>
-  <p>In <a href="lesson-2.html">Lesson 2</a>, you make these changes on a real sandbox and verify each one. Keep your reply to Priya. It's your plan.</p>
+  <p>In <a href="lesson-2.html">Lesson 2</a>, you apply the changes you decided on here to a real sandbox, and verify each one.</p>
   <details>
     <summary>Design notes for reviewers</summary>
     <div style="display:flex;flex-direction:column;gap:0.8rem;padding-top:0.8rem;">
@@ -403,8 +374,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
           <tr><td>Section 1</td><td>1</td><td>Present, guide, elicit, give feedback</td></tr>
           <tr><td>Section 2</td><td>2</td><td>Present, elicit, give feedback</td></tr>
           <tr><td>Sections 3 and 4</td><td>3</td><td>Present, guide, elicit, give feedback</td></tr>
-          <tr><td>Reply to Priya</td><td>1, 2, 3</td><td>Assess performance</td></tr>
-          <tr><td>Stretch and handoff to Lesson 2</td><td>3</td><td>Enhance retention and transfer</td></tr>
+          <tr><td>Handoff to Lesson 2</td><td>3</td><td>Enhance retention and transfer</td></tr>
         </tbody>
       </table></div>
       <p class="meta">Sections follow the assertion-evidence pattern: a sentence heading states the takeaway, the body is evidence for it, and an exercise tests it. Section headings are sentences by design, which departs from the eight-word heading limit in Docker's documentation style guide. Voice, word choice, and formatting follow that guide.</p>
@@ -559,7 +529,7 @@ function checkPolicy(data, state, raw) {
   function clearOnChange(container, errId) { container.addEventListener('change', function () { $(errId).textContent = ''; }); }
   function groupToggles(container, prefix, state, onChange) {
     DATA.order.forEach(function (id) {
-      var cb = el('input', { type: 'checkbox', id: prefix + id }); cb.checked = true;
+      var cb = el('input', { type: 'checkbox', id: prefix + id }); cb.checked = !!state[id];
       cb.addEventListener('change', function () { state[id] = cb.checked; onChange(); });
       container.appendChild(el('label', { 'for': prefix + id }, [cb, el('span', null, [el('span', { text: NAMES[id] }), el('span', { cls: 'count', text: ' ' + DATA.groups[id].length + ' rules' })])]));
     });
@@ -733,7 +703,7 @@ function checkPolicy(data, state, raw) {
   });
 
   /* Section 3 consequences */
-  var cons = { groups: allOn() };
+  var cons = { groups: without(DATA.order) };
   var acts = [
     { label: 'Install a Python package', target: 'pypi.org:443', need: true },
     { label: 'Clone a repository from GitHub', target: 'github.com:443', need: true },
@@ -756,7 +726,7 @@ function checkPolicy(data, state, raw) {
     });
     var sum = $('cons-sum'); clear(sum);
     if (!broken && !open) sum.appendChild(fb('ok', 'Hardened.', 'Everything the team needs works, and nothing unneeded is open.'));
-    else sum.appendChild(fb('warn', broken + ' broken, ' + open + ' still open.', broken ? 'Something the team needs is blocked. Bring back only what they need.' : 'Find the group that allows what nobody needs.'));
+    else sum.appendChild(fb('warn', broken + ' broken, ' + open + ' still open.', broken ? 'Something the team needs is blocked. Switch on only the groups they need.' : 'Find the group that allows what nobody needs.'));
   }
   groupToggles($('cons-groups'), 'cons-', cons.groups, runCons);
   $('cons-pw').addEventListener('change', runCons);
@@ -827,27 +797,6 @@ function checkPolicy(data, state, raw) {
     });
   });
 
-  /* Assessment */
-  var rubric = [
-    'It says what I changed and what I left alone.',
-    "It gives a reason tied to the team's work for each change.",
-    'It brings back at least one host from a group I removed.',
-    'It names a risk that the policy leaves in place.',
-    'A junior developer could follow it without looking anything up.'
-  ];
-  var rb = $('rubric');
-  rubric.forEach(function (t, i) {
-    rb.appendChild(el('label', { 'for': 'rubric-' + i }, [el('input', { type: 'checkbox', id: 'rubric-' + i }), el('span', { text: t })]));
-  });
-  rb.addEventListener('change', function () {
-    var n = rb.querySelectorAll('input:checked').length;
-    $('rubric-score').textContent = 'Your reply meets ' + n + ' of ' + rubric.length + ' criteria.' + (n < rubric.length ? ' Revise it before the lab. Your reply is the plan you follow there.' : ' Take it into the lab as your plan.');
-  });
-  $('assess-text').addEventListener('input', function () { $('assess-err').textContent = ''; });
-  $('assess-btn').addEventListener('click', function () {
-    if ($('assess-text').value.trim().length < 40) { $('assess-err').textContent = 'Write your reply first. A few sentences is enough.'; return; }
-    $('assess-fb').hidden = false;
-  });
 })();
 </script>
 </body>
