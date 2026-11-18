@@ -1,0 +1,171 @@
+/* Docker Learn look-alike theme for this independent sample course.
+   Tokens and component rules follow the values published on docs.docker.com/learn
+   (captured Nov. 17, 2026). Loaded after each page's own <style> blocks so it
+   overrides them. No Docker logos or site navigation are reproduced. */
+
+:root {
+  --paper: #fff; --page: #f9f9fa;
+  --ink: #101828; --ink-soft: #364153; --muted: #566581;
+  --line-d: #c8cfda; --soft-line: #e7eaef;
+  --panel: #f9fafb; --panel-strong: #e7eaef;
+  --accent-d: #2560ff; --accent-ink: #003db5; --accent-soft-d: #f6f8fe;
+  --code: #1e2129; --code-ink: #f9fafb; --code-inline: #e7eaef;
+  --note: #001d56; --note-soft: #f6f8fe;
+  --tip: #174b32; --tip-soft: #ebf9ee;
+  --caution: #854900; --caution-soft: #fffbf0;
+  --safe: #216e4b; --danger: #b30909;
+  --radius: .25rem; --radius-pill: 999px;
+  --space-2xs: .25rem; --space-xs: .5rem; --space-sm: .75rem; --space-md: 1.25rem; --space-lg: 2rem; --space-xl: 3rem;
+  --step--2: .75rem; --step--1: .875rem; --step-0: 1rem; --step-1: 1.125rem;
+  --font-sans: "Roboto Flex", system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Map the course's original variables onto Docker's tokens */
+  --bg: var(--panel); --surface: var(--paper); --line: var(--line-d);
+  --accent: var(--accent-d); --accent-soft: var(--accent-soft-d);
+  --ok: var(--safe); --ok-bg: var(--tip-soft); --no: var(--danger); --no-bg: #fff5f5;
+  --warn: var(--caution); --warn-bg: var(--caution-soft);
+  --display: var(--font-sans); --body: var(--font-sans); --mono: var(--font-mono);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: light; } }
+
+html { background: var(--paper); }
+body { background: var(--page); color: var(--ink-soft); font-family: var(--font-sans); font-size: 16px; line-height: 1.75;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+a { color: var(--accent-d); text-decoration: none; }
+a:hover { text-decoration: underline; }
+strong { color: var(--ink); font-weight: 600; }
+
+/* Top bar: Docker blue, with this course's own name and the disclaimer */
+.topbar { background: #2560ff; color: #fff; height: 64px; display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; padding: 0 2rem; font-size: var(--step--1); position: sticky; top: 0; z-index: 10; }
+.topbar a { color: #fff; font-weight: 500; font-size: 1.05rem; }
+.topbar .topbar__note { opacity: .85; font-size: var(--step--2); text-align: right; }
+
+/* Page shell: white paper, main column plus right rail */
+.shell { background: var(--paper); padding: var(--space-lg); min-height: calc(100vh - 64px); max-width: 76rem; margin: 0 auto; }
+.page-columns { display: flex; gap: var(--space-lg); }
+main.page-columns__main { flex: 2 2 0%; min-width: 0; max-width: 48rem; margin: 0; padding: 0 0 5rem; display: block; }
+.page-columns__aside { flex: 1 1 0%; min-width: 13rem; max-width: 18rem; display: none; }
+@media (width >= 64rem) { .page-columns__aside { display: block; } }
+.aside-rail { position: sticky; top: 64px; max-height: calc(100vh - 64px); overflow-y: auto; padding: var(--space-md) 0 var(--space-sm); }
+@media (width < 48rem) { .shell { padding: var(--space-lg) var(--space-md); } .topbar { padding: 0 1rem; } .topbar .topbar__note { display: none; } }
+
+/* Breadcrumbs */
+.page-eyebrow { display: flex; flex-wrap: wrap; gap: .4rem; font-size: var(--step--1); color: var(--muted); margin-bottom: var(--space-md); }
+.page-eyebrow span[aria-hidden] { color: var(--muted); }
+
+/* Resource header */
+.resource-header { display: block !important; }
+.type-label { display: inline-block; border-radius: var(--radius); background: color-mix(in srgb, currentcolor 10%, transparent 90%);
+  font-size: var(--step--2); letter-spacing: .015em; padding: .1rem .4rem; font-weight: 500; line-height: 1.5; color: var(--ink-soft); }
+h1 { font-family: var(--font-sans); font-weight: 500; font-size: 1.8rem; line-height: 1.25; color: var(--ink); margin: var(--space-sm) 0 .75rem; max-width: 34rem; text-wrap: balance; }
+.byline { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2xs) var(--space-xs); margin: var(--space-sm) 0 0; font-size: var(--step--1); color: var(--muted); }
+.byline__badge { border: 1px solid var(--soft-line); border-radius: var(--radius-pill); background: var(--panel-strong); font-size: var(--step--2); color: var(--ink-soft); padding: 0 .5rem; }
+.resource-facts { display: flex; flex-wrap: wrap; gap: 0 var(--space-sm); margin: var(--space-xs) 0 0; padding: 0; list-style: none; color: var(--muted); font-size: var(--step--1); }
+.resource-facts li + li::before { content: "·"; margin-right: var(--space-sm); }
+.lede { font-size: var(--step-1); color: var(--ink-soft); margin-top: var(--space-md) !important; }
+.eyebrow { font-size: var(--step--1); color: var(--muted); }
+.meta { color: var(--muted); font-size: var(--step--1); }
+
+/* Draft notice as a Docker "warning" callout */
+.draft { margin: 0 0 var(--space-md); padding: var(--space-sm) var(--space-md); border-radius: var(--radius); background: var(--caution-soft); color: var(--caution); font-size: var(--step--1); }
+
+/* Body copy rhythm (Docker .prose) */
+main section { display: block; margin: 0; }
+main p { margin: 1.25em 0; }
+main ul, main ol { display: block; padding-left: 1.625em; margin: 1.25em 0; }
+main li { margin: .5em 0; }
+h2 { font-family: var(--font-sans); font-size: 1.6rem; font-weight: 700; line-height: 1.25; color: var(--ink); margin: 1.75rem 0 .75rem; padding: 0; border: 0; letter-spacing: normal; text-wrap: balance; }
+h3 { font-family: var(--font-sans); font-size: 1.3rem; font-weight: 600; line-height: 1.3; color: var(--ink); margin: 1.6em 0 .6em; }
+.sec-no { font-size: var(--step--2); letter-spacing: .015em; text-transform: uppercase; font-weight: 600; color: var(--muted);
+  border-top: 1px solid var(--soft-line); padding-top: var(--space-lg); margin: var(--space-xl) 0 0; }
+.sec-no + h2 { margin-top: .25rem; border: 0; padding: 0; }
+code { font-family: var(--font-mono); background: var(--code-inline); color: var(--ink); border-radius: var(--radius); padding: .2em .25em; font-size: .875em; }
+
+/* "What you'll learn" panel */
+#objectives { margin: var(--space-lg) 0; border-left: 3px solid var(--accent-d); background: var(--panel); border-radius: var(--radius); padding: 1rem 1.25rem; }
+#objectives h2 { font-size: var(--step-0); font-weight: 500; margin: 0 0 var(--space-xs); }
+#objectives ul { margin: 0; padding-left: 1.25rem; }
+
+/* Opener story, scenario, panels */
+.story { background: var(--note-soft); border: 0; border-radius: var(--radius); padding: var(--space-md); display: block; margin: var(--space-md) 0; }
+.story h3 { margin-top: 0; font-size: var(--step-1); }
+.story p { margin: .75em 0; }
+.story .promise { font-family: var(--font-sans); font-size: var(--step-1); font-weight: 600; color: var(--note); margin-bottom: 0; }
+.team { border-left: 3px solid var(--line-d); padding: 0 0 0 var(--space-md); display: block; }
+.ex, .step { background: var(--panel); border: 1px solid var(--line-d); border-radius: var(--radius); padding: var(--space-md); margin: var(--space-lg) 0; display: flex; flex-direction: column; gap: var(--space-sm); }
+.ex p, .step p, .ex ul, .step ul { margin: 0; }
+.ex-tag, .stepno { font-size: var(--step--2); letter-spacing: .015em; text-transform: uppercase; font-weight: 600; color: var(--muted); }
+.card { background: var(--paper); border: 1px solid var(--soft-line); border-radius: var(--radius); padding: var(--space-md); }
+a.card:hover { border-color: var(--accent-d); text-decoration: none; }
+.card h3 { margin: 0; font-size: var(--step-1); }
+.card p { margin: 0; }
+
+/* Terminal blocks, matching Docker's inline terminal */
+.cmdrow { display: block; }
+.cmd { font-family: var(--font-mono); font-size: var(--step--1); line-height: 1.6; background: var(--code); color: var(--code-ink);
+  border-radius: var(--radius) var(--radius) 0 0; padding: var(--space-xs) var(--space-sm); margin: 0; white-space: pre-wrap; }
+.cmd::before { content: "$ "; opacity: .55; }
+.cli { font-family: var(--font-mono); font-size: var(--step--1); line-height: 1.6; background: var(--panel-strong); color: var(--ink-soft);
+  border: 0; border-radius: 0 0 var(--radius) var(--radius); padding: var(--space-xs) var(--space-sm); margin: 0; }
+.cmdrow + .cli, .cmdrow + .reveal .cli { margin-top: 0; }
+.ex > .cli, .step > .cli:first-child { border-radius: var(--radius); }
+
+/* Controls */
+button { font-family: var(--font-sans); font-size: var(--step--1); font-weight: 500; background: var(--accent-d); color: #fff; border: 0; border-radius: var(--radius); padding: .45rem 1rem; }
+button:hover { background: #0d4df2; }
+button.quiet { background: transparent; color: var(--muted); border: 1px solid var(--line-d); border-radius: var(--radius-pill); padding: 0 var(--space-xs); font-size: var(--step--2); line-height: 1.6; }
+button.quiet:hover { border-color: var(--accent-d); background: var(--accent-soft-d); color: var(--accent-ink); }
+input[type="text"], select, textarea { border-radius: var(--radius); background: var(--paper); border-color: var(--line-d); }
+.fb, .result, .note { border-radius: var(--radius); }
+.fb.ok { background: var(--tip-soft); color: var(--tip); }
+.pill { border-radius: var(--radius-pill); font-size: var(--step--2); font-weight: 500; }
+.flow-q, .flow-a, .flow-start { border-radius: var(--radius); }
+.flow-start { background: var(--accent-soft-d); color: var(--note); }
+
+/* Tables (Docker .prose table) */
+table { font-size: var(--step--1); line-height: 1.5; }
+th, td { padding: var(--space-xs); border-bottom: 1px solid var(--soft-line); }
+thead th { background: var(--panel-strong); color: var(--ink); font-weight: 600; border-bottom: 1px solid var(--line-d); }
+tbody tr:last-child td { border-bottom: 0; }
+.tablewrap { margin: var(--space-md) 0; }
+details summary { color: var(--accent-d); }
+
+/* Right rail: course position and table of contents */
+.path-callout { margin-bottom: var(--space-lg); padding-left: var(--space-sm); border-left: 3px solid var(--accent-d); font-size: var(--step--1); line-height: 1.5; }
+.path-callout p { margin: 0; }
+.path-callout__label, .path-callout__nav span { color: var(--muted); font-size: var(--step--2); letter-spacing: .015em; text-transform: uppercase; font-weight: 600; display: block; }
+.path-callout__title { margin-top: var(--space-2xs) !important; font-size: var(--step-0); line-height: 1.3; }
+.path-callout__position { margin-top: var(--space-2xs) !important; color: var(--muted); }
+.path-callout__steps { display: flex; gap: 3px; margin: var(--space-2xs) 0 0; padding: 0; list-style: none; }
+.path-callout__steps li { flex: 1; height: 4px; border-radius: 2px; background: var(--line-d); margin: 0; }
+.path-callout__steps li.past { background: var(--accent-d); opacity: .45; }
+.path-callout__steps li.current { background: var(--accent-d); }
+.path-callout__nav { margin-top: var(--space-sm); }
+.path-callout__nav a { color: var(--ink); display: block; }
+.path-callout__nav strong { font-weight: 500; display: block; }
+.toc { font-size: var(--step--1); line-height: 1.5; }
+.toc__title { font-size: var(--step-1); font-weight: 500; color: var(--ink); margin: 0 0 var(--space-xs); }
+.toc ul { list-style: none; margin: 0; padding-left: var(--space-xs); }
+.toc a { display: block; padding: var(--space-2xs) 0 var(--space-2xs) var(--space-xs); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 2px solid transparent; }
+.toc a:hover { border-left-color: var(--line-d); background: linear-gradient(to right, var(--panel), transparent); color: var(--ink); font-weight: 500; text-decoration: none; }
+
+/* "Continue with Docker's guides" block (Docker .references) */
+.references { margin: var(--space-xl) 0 0; background: var(--panel); border-radius: var(--radius); padding: 1rem 1.25rem; }
+.references h2 { font-size: var(--step-0); font-weight: 500; margin: 0 0 var(--space-xs); }
+.references ul { margin: 0; padding-left: 1.25rem; }
+.references li { margin: .35em 0; }
+.references .meta { margin: var(--space-xs) 0 0; }
+
+/* Specificity fixes: keep header lists and rail lists out of the body-copy list rules */
+main ul.resource-facts { display: flex; flex-direction: row; margin: var(--space-xs) 0 0; padding: 0; }
+main ul.resource-facts li { margin: 0; }
+ol.path-callout__steps { display: flex; flex-direction: row; gap: 3px; }
+ol.path-callout__steps li { display: block; flex: 1 1 0; min-width: 1rem; height: 4px; }
+
+/* Command row: copy button sits inside the dark command bar, as in Docker's terminals */
+.cmdrow { display: flex; align-items: center; background: var(--code); border-radius: var(--radius); }
+.cmdrow .cmd { flex: 1 1 auto; background: transparent; border-radius: 0; }
+.cmdrow button.quiet { flex: 0 0 auto; margin: 0 var(--space-xs); color: #c8cfda; border-color: #566581; background: transparent; }
+.cmdrow button.quiet:hover { color: #fff; border-color: #fff; background: transparent; }
