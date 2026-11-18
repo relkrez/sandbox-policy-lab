@@ -289,7 +289,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <tbody>
       <tr><td>Remove a group</td><td>Every destination that only that group allowed is now blocked. That includes destinations you didn't know were in it.</td></tr>
       <tr><td>Allow a host</td><td>That one destination is reachable again, and nothing else is.</td></tr>
-      <tr><td>Deny a host</td><td>That destination is blocked, even when a group or a kit allows it.</td></tr>
+      <tr><td>Deny a host</td><td>That destination is blocked, even when a group or a kit allows it. Section 4 explains how a blocked host that shares an IP address with an allowed host can still be reached in a local sandbox.</td></tr>
     </tbody>
   </table></div>
   <p>The kit policy stays in place whatever you remove from the local policy.</p>
@@ -324,7 +324,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 <!-- BEGIN section:s4 -->
 <section id="s4">
   <p class="sec-no">Section 4</p>
-  <h2>A wildcard allows more than it names</h2>
+  <h2>Wildcards and shared IP addresses let rules allow more hosts than they name</h2>
   <p>Some rules use a wildcard to cover many hosts at once. The two kinds behave differently.</p>
   <div class="tablewrap"><table>
     <thead><tr><th>Rule</th><th>Matches</th><th>Doesn't match</th></tr></thead>
@@ -335,6 +335,15 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
   </table></div>
   <p class="meta">Tested on <code>sbx</code> v0.54.0. Docker's reference documents the one-star behavior. The two-star match on the bare domain comes from testing.</p>
   <p>The consequence: one two-star rule in the Cloud infrastructure group allows every storage bucket on AWS, including a bucket that belongs to someone else.</p>
+  <h3>A blocked host can share an address with an allowed host</h3>
+  <p>The checkpoint doesn't match rules against IP addresses. It matches them against the hostname the connection names, such as the TLS Server Name Indication, or SNI, or the HTTP <code>Host</code> header. In local sandboxes, that means a blocked host that shares an IP address with an allowed host can still be reached.</p>
+  <p>This happens in three cases:</p>
+  <ul>
+    <li><strong>Encrypted connections the checkpoint doesn't decrypt.</strong> The checkpoint can't see the hostname a request names inside the encrypted traffic, so it doesn't check that name.</li>
+    <li><strong>Unencrypted connections sent through a tunnel, or that don't use the sandbox's proxy setting.</strong> The checkpoint checks the hostname in the first request only. Later requests on the same connection aren't checked. This doesn't apply to unencrypted requests sent to the sandbox's proxy setting.</li>
+    <li><strong>Connections that name no host.</strong> The checkpoint uses an allowed hostname that the sandbox looked up for that address, even if a blocked hostname also points to the same address.</li>
+  </ul>
+  <p class="meta">Docker's documentation describes this limitation for local sandboxes. It doesn't come from testing.</p>
   <div class="ex">
     <span class="ex-tag">Try it · Test a wildcard</span>
     <div class="row">
@@ -352,6 +361,8 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <span class="ex-tag">Exercise 4 · Wildcard consequences</span>
     <p>Predict each result before you check it. All three use the Balanced preset, unchanged.</p>
     <div id="trace-4"></div>
+    <p>In a local sandbox, you block one host. It shares an IP address with a host you allow. An agent opens an encrypted connection that names the allowed host at the start, and the checkpoint doesn't decrypt it. Inside the encrypted traffic, the agent's request names the blocked host. What happens?</p>
+    <div class="q" data-options="The checkpoint blocks it, because both hosts share a blocked IP address|The request reaches the blocked host, because the checkpoint checks only the name it can see|The checkpoint blocks it, because it reads the hostname inside the encrypted traffic" data-answer="1" data-fb0="Not quite. The checkpoint matches rules against hostnames, not IP addresses. The address is shared with an allowed host, so the address itself tells the checkpoint nothing." data-fb1="Right. The checkpoint sees only the allowed name at the start of the connection. It doesn't decrypt the traffic, so it never checks the blocked name inside it." data-fb2="Not quite. When the checkpoint doesn't decrypt a connection, it can't see the hostname inside the encrypted traffic, so it doesn't check that name."></div>
   </div>
 </section>
 <!-- END section:s4 -->
