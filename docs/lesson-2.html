@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sandbox policy lesson 2 draft</title>
+<title>Change and verify a sandbox policy | Harden a local sandbox policy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600;8..144,700&display=swap" rel="stylesheet">
 <style>
 /* Layout: one reading column, 68ch, exercises set off as bordered panels on the same column */
 :root {
@@ -102,14 +102,18 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 .note { background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 0.5rem 0.8rem; font-size: 0.9rem; }
 .predict { display: flex; flex-direction: column; gap: 0.6rem; }
 </style>
+<link rel="stylesheet" href="learn.css">
 </head>
 <body>
-<main>
+<div class="topbar"><a href="index.html">Harden a local sandbox policy</a><span class="topbar__note">Independent sample course. Not affiliated with or endorsed by Docker.</span></div>
+<div class="shell"><div class="page-columns">
+<main class="page-columns__main">
 
-<header style="display:flex;flex-direction:column;gap:1rem;">
-  <p class="draft">Draft 2 for play testing. Output captured from <code>sbx</code> v0.54.0 in Command Prompt on Windows 11, Nov. 16, 2026. Three items marked with a draft note still need a capture or a test.</p>
-  <p class="eyebrow"><a href="index.html">Harden a local sandbox policy</a> · Lesson 2 of 2 · About 30 minutes</p>
+<header class="resource-header">
+  <nav class="page-eyebrow" aria-label="Breadcrumbs"><a href="index.html">Harden a local sandbox policy</a><span aria-hidden="true">/</span><span aria-current="page">Change and verify a sandbox policy</span></nav>
+  <span class="type-label">Lesson 2 of 2</span>
   <h1>Change and verify a sandbox policy</h1>
+  <p class="byline"><span class="byline__label">By</span><a href="https://www.linkedin.com/in/zerkler">David Zerkler</a><span class="byline__badge">Independent sample</span></p><ul class="resource-facts"><li>Intermediate</li><li>30 min</li><li>Tested on sbx v0.54.0</li><li>Updated Nov 17, 2026</li></ul>
   <p class="lede">Apply the decision you made for Priya on a real sandbox, and confirm each change did what you intended. A policy change that nobody checks is a guess.</p>
 </header>
 
@@ -129,7 +133,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 <section id="scenario">
   <h2>Lesson scenario</h2>
   <div class="team">
-    <p>You're at Priya's machine with the reply you wrote in Lesson 1. Your plan has four changes:</p>
+    <p>You're at Priya's machine. Based on Lesson 1, you've decided on four changes:</p>
     <ol>
       <li>Remove the Cloud infrastructure group.</li>
       <li>Allow <code>cdn.playwright.dev</code> again.</li>
@@ -139,8 +143,9 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
   </div>
   <h3>Before you start</h3>
   <ul>
+    <li>You run every step on your own computer, in your terminal, using your real sandbox and policies. The lab changes your local policy, and the last section puts it back.</li>
     <li><code>sbx</code> is installed, and the Balanced preset is set with no changes.</li>
-    <li>One sandbox exists that uses the Claude Code kit. Ours is named <code>day3</code>. Use your sandbox's name wherever you see <code>day3</code>.</li>
+    <li>You have a sandbox that runs Claude Code. Ours is named <code>priya-tools</code>. Use your sandbox's name wherever you see it.</li>
     <li>Rule IDs and the kit policy ID on your machine differ from the ones shown here.</li>
   </ul>
   <p>Every step shows the real output under the command. Where a step asks for a prediction, answer before you run the command.</p>
@@ -260,14 +265,14 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <div class="predict"><p>How many policies will the listing show?</p></div>
     <div class="reveal" hidden>
       <pre class="cli">  POLICY                                 SOURCE   APPLIES TO     SUMMARY
-  c160c65c-918d-463e-8bdb-db67fc0f19b2   kit      sandbox:day3   network: 8 allow
+  c160c65c-918d-463e-8bdb-db67fc0f19b2   kit      sandbox:priya-tools   network: 8 allow
   default-deny-all                       local    all            network: deny when no rule decides
   local-policy                           local    all            network: 195 allow; filesystem read: 1 allow; filesystem write: 1 allow</pre>
       <div class="tablewrap"><table>
         <thead><tr><th>Column</th><th>What it tells you</th></tr></thead>
         <tbody>
           <tr><td><code>SOURCE</code></td><td>Where the policy came from. <code>local</code> is yours. <code>kit</code> arrived with a kit.</td></tr>
-          <tr><td><code>APPLIES TO</code></td><td><code>all</code> means every sandbox on the machine. <code>sandbox:day3</code> means that sandbox only.</td></tr>
+          <tr><td><code>APPLIES TO</code></td><td><code>all</code> means every sandbox on the machine. <code>sandbox:priya-tools</code> means that sandbox only.</td></tr>
           <tr><td><code>SUMMARY</code></td><td>A count of rules by type and decision.</td></tr>
         </tbody>
       </table></div>
@@ -277,8 +282,8 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
   <div class="step">
     <span class="stepno">Step 4 · Run</span>
     <p>List the policies for one sandbox to see what applies to it in total.</p>
-    <div class="cmdrow"><pre class="cmd">sbx policy ls day3</pre></div>
-    <pre class="cli">    Policy for sandbox:  day3
+    <div class="cmdrow"><pre class="cmd">sbx policy ls priya-tools</pre></div>
+    <pre class="cli">    Policy for sandbox:  priya-tools
 
   NETWORK
     • allow 196 hosts from c160c65c-918d-463e-8bdb-db67fc0f19b2, local-policy
@@ -288,7 +293,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     • read allow all paths from local-policy
     • write allow all paths from local-policy
 
-    try: sbx policy ls day3 --wide</pre>
+    try: sbx policy ls priya-tools --wide</pre>
     <p class="note">Draft note: this output is reconstructed from a capture taken with two extra rules in place. Recapture it on a clean Balanced preset before publishing.</p>
   </div>
 
@@ -466,10 +471,10 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
   Removed rule from policy local: id=default-ai-services</pre>
   </div>
 
-  <div class="step" data-options="Allowed both times|Denied both times|Denied for all sandboxes, allowed for day3|Allowed for all sandboxes, denied for day3" data-answer="2" data-why="The local policy no longer allows this host. The kit policy still does, and it applies only to the sandbox that uses the kit. Claude Code keeps working in day3.">
+  <div class="step" data-options="Allowed both times|Denied both times|Denied for all sandboxes, allowed for priya-tools|Allowed for all sandboxes, denied for priya-tools" data-answer="2" data-why="The local policy no longer allows this host. The kit policy still does, and it applies only to the sandbox that uses the kit. Claude Code keeps working in priya-tools.">
     <span class="stepno">Step 13 · Predict, then run both</span>
     <div class="cmdrow"><pre class="cmd">sbx policy check network api.anthropic.com:443</pre></div>
-    <div class="cmdrow"><pre class="cmd">sbx policy check network --sandbox day3 api.anthropic.com:443</pre></div>
+    <div class="cmdrow"><pre class="cmd">sbx policy check network --sandbox priya-tools api.anthropic.com:443</pre></div>
     <div class="predict"><p>Claude Code needs this host. What will the two checks report?</p></div>
     <div class="reveal" hidden>
       <pre class="cli">    Denied:      api.anthropic.com:443
@@ -478,8 +483,8 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     Reason:      no matching allow rule (default deny)</pre>
       <pre class="cli">    Allowed:     api.anthropic.com:443
     Governance:  Local policy only
-    Context:     sandbox:day3
-    Rule:        kit:day3</pre>
+    Context:     sandbox:priya-tools
+    Rule:        kit:priya-tools</pre>
     </div>
   </div>
 
@@ -559,7 +564,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 <!-- BEGIN section:assess -->
 <section id="assess">
   <h2>Prove the policy matches your decision</h2>
-  <p>Your reply to Priya made promises: these things still work, and these are closed. A check script turns each promise into a line that passes or fails. It works because a denied check exits with status 1.</p>
+  <p>The changes you decided on make promises: these things still work, and these are closed. A check script turns each promise into a line that passes or fails. It works because a denied check exits with status 1.</p>
 
   <div class="step" data-options="137 allow, 1 deny|159 allow, 1 deny|136 allow|195 allow, 1 deny" data-answer="0" data-why="195 at the start, less 36 for Cloud infrastructure and 23 for AI services, plus the one host you allowed. The deny rule is counted on its own.">
     <span class="stepno">Step 16 · Predict, then run</span>
@@ -676,7 +681,24 @@ All checks passed.</pre>
 </section>
 <!-- END section:cleanup -->
 
+
+<!-- Links to Docker's own sandbox guides -->
+<aside class="references" aria-labelledby="references-heading">
+  <h2 id="references-heading">Continue with Docker's sandbox guides</h2>
+  <ul>
+    <li><a href="https://docs.docker.com/learn/content/what-is-a-sandbox/">What is a sandbox? &#8599;</a></li>
+    <li><a href="https://docs.docker.com/learn/content/run-your-first-sandbox/">Run your first AI agent in a Docker Sandbox &#8599;</a></li>
+    <li><a href="https://docs.docker.com/learn/content/customize-your-sandbox-with-kits/">Customize your sandbox with kits &#8599;</a></li>
+    <li><a href="https://docs.docker.com/learn/content/build-your-first-sandbox-kit/">Build your first Docker Sandbox kit &#8599;</a></li>
+    <li><a href="https://docs.docker.com/learn/content/connect-to-services-without-exposing-credentials/">Connect to services without exposing credentials &#8599;</a></li>
+    <li><a href="https://docs.docker.com/ai/sandboxes/governance/access-controls/local/">Local network policy (reference) &#8599;</a></li>
+    <li><a href="https://docs.docker.com/reference/cli/sbx/">sbx CLI reference &#8599;</a></li>
+  </ul>
+</aside>
 </main>
+<aside class="page-columns__aside"><div class="aside-rail"><div class="path-callout"><p class="path-callout__label">Sample course</p><p class="path-callout__title"><a href="index.html">Harden a local sandbox policy</a></p><p class="path-callout__position">Lesson 2 of 2</p><ol class="path-callout__steps"><li class="past"></li><li class="current"></li></ol><div class="path-callout__nav"><span>Previous</span><a href="lesson-1.html"><strong>&larr; Decide what a sandbox can reach</strong></a></div></div><nav class="toc" aria-label="Table of contents"><p class="toc__title">Table of contents</p><ul id="toc-list"></ul></nav></div></aside>
+</div></div>
+<script src="learn.js"></script>
 <script>
 (function () {
   function el(tag, attrs, kids) {

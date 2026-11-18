@@ -391,9 +391,47 @@ def main():
         f"Refresh: {material_count} material change{'s' if material_count != 1 else ''} in {len(commits)} upstream commit{'s' if len(commits) != 1 else ''}"
     )
     write("_pr-title.txt", title + "\n")
-    write("_pr-body.md", "\n".join(log) + "\n")
+    write("_pr-body.md", "\n".join(review_guide(repo, branch, changed_lessons) + log) + "\n")
     print(title)
     print(f"Log written to {log_path}")
+
+    # Tell the workflow whether a pull request is needed.
+    out = os.environ.get("GITHUB_OUTPUT")
+    if out:
+        with open(out, "a", encoding="utf-8") as f:
+            f.write(f"material={material_count}\n")
+
+
+def review_guide(repo, branch, changed_lessons):
+    """The opening of the pull request: everything the SME needs, in order."""
+    checklist = f"https://github.com/{repo}/blob/{branch}/review/sme-checklist.md" if repo and branch else "review/sme-checklist.md"
+    lines = [
+        "## Your review",
+        "",
+        "Docker changed a documentation page this course draws on. The workflow judged the change material and drafted an update. Nothing is published until you merge this pull request.",
+        "",
+        "1. **Read why.** The refresh log below explains each decision and links to Docker's original change.",
+        "2. **See the changes.** Open the **Files changed** tab to compare the draft with the published lesson, line by line.",
+    ]
+    if changed_lessons and repo and branch:
+        links = ", ".join(
+            f"[{lesson.split('/')[-1]}](https://htmlpreview.github.io/?https://github.com/{repo}/blob/{branch}/{lesson})"
+            for lesson in changed_lessons
+        )
+        lines.append(f"3. **Try the lesson.** Open the redrafted version in a browser: {links}.")
+    else:
+        lines.append("3. **Try the lesson.** Download the changed file from **Files changed** and open it in a browser.")
+    lines += [
+        f"4. **Check it.** Work through the [SME checklist]({checklist}). Run any new command on your own machine.",
+        "5. **Decide.**",
+        "   - **Accept:** select **Merge pull request**. GitHub Pages republishes the course within a few minutes.",
+        f"   - **Accept with edits:** open the file from **Files changed**, choose **Edit file**, and commit to this branch (`{branch or 'the pull request branch'}`). Then merge.",
+        "   - **Reject:** add a comment that says why, then select **Close pull request**. The workflow won't draft this change again.",
+        "",
+        "---",
+        "",
+    ]
+    return lines
 
 
 if __name__ == "__main__":

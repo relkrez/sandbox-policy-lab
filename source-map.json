@@ -265,28 +265,6 @@
       ]
     },
     {
-      "lesson": "docs/lesson-1.html",
-      "section": "assess",
-      "heading": "Write your reply to Priya",
-      "claims": [
-        {
-          "id": "L1-A-1",
-          "text": "The model reply applies the claims of sections 2 to 4 to the scenario team. It has no source of its own.",
-          "source": {
-            "kind": "derived",
-            "from": [
-              "L1-S2-4",
-              "L1-S3-1",
-              "L1-S3-2",
-              "L1-S3-3",
-              "L1-S3-5",
-              "L1-S4-2"
-            ]
-          }
-        }
-      ]
-    },
-    {
       "lesson": "docs/lesson-2.html",
       "section": "s1",
       "heading": "The CLI documents itself, so ask it before you guess",
