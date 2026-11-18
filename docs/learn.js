@@ -1,4 +1,4 @@
- JS
+
 // Builds the right-rail table of contents from the lesson's h2 headings.
 (function () {
   var toc = document.getElementById('toc-list');
