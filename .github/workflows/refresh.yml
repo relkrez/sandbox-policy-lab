@@ -33,7 +33,7 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     env:
-      BRANCH: refresh/run-${{ github.run_number }}
+      BRANCH: refresh/run-${{ github.run_id }}
       # Who reviews the drafts. Set the repository variable SME_REVIEWER to
       # change it. The default is the repository owner.
       SME: ${{ vars.SME_REVIEWER || github.repository_owner }}
