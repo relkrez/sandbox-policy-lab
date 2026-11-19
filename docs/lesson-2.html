@@ -294,7 +294,6 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     • write allow all paths from local-policy
 
     try: sbx policy ls priya-tools --wide</pre>
-    <p class="note">Draft note: this output is reconstructed from a capture taken with two extra rules in place. Recapture it on a clean Balanced preset before publishing.</p>
   </div>
 
   <div class="ex">
@@ -329,7 +328,6 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
   -      default-fs-read-allow-all      no         filesystem rules cannot be modified with the CLI
   -      default-fs-write-allow-all     no         filesystem rules cannot be modified with the CLI</pre>
     <p>Each group in Lesson 1 is one rule ID here. The <code>ACTION</code> column prints the command that removes it.</p>
-    <p class="note">Draft note: output shortened, and two rows for rules added during testing are left out. Recapture on a clean preset before publishing.</p>
   </div>
 
   <div class="step">
@@ -572,7 +570,6 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <div class="predict"><p>What will the summary for <code>local-policy</code> show for network rules?</p></div>
     <div class="reveal" hidden>
       <pre class="cli">  local-policy                           local    all            network: 137 allow, 1 deny; filesystem read: 1 allow; filesystem write: 1 allow</pre>
-      <p class="note">Draft note: this line is calculated, not captured. Confirm it on the machine before publishing.</p>
     </div>
   </div>
 
