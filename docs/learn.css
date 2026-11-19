@@ -169,3 +169,21 @@ ol.path-callout__steps li { display: block; flex: 1 1 0; min-width: 1rem; height
 .cmdrow .cmd { flex: 1 1 auto; background: transparent; border-radius: 0; }
 .cmdrow button.quiet { flex: 0 0 auto; margin: 0 var(--space-xs); color: #c8cfda; border-color: #566581; background: transparent; }
 .cmdrow button.quiet:hover { color: #fff; border-color: #fff; background: transparent; }
+
+/* Always use the light theme. The pages' original styles switch to a dark
+   theme when the device is in dark mode (common on iPhone and Mac), and that
+   rule outranks the variables above, which mixed dark colours into the light
+   design. This block outranks it in turn and keeps every colour light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: light;
+    --ink: #101828; --muted: #566581; --line: #c8cfda;
+    --bg: #f9fafb; --surface: #fff;
+    --accent: #2560ff; --accent-soft: #f6f8fe;
+    --ok: #216e4b; --ok-bg: #ebf9ee; --no: #b30909; --no-bg: #fff5f5;
+    --warn: #854900; --warn-bg: #fffbf0;
+  }
+}
+
+/* Keep headings clear of the sticky top bar when a contents link jumps to them. */
+main h2, main h3, main section { scroll-margin-top: 80px; }
