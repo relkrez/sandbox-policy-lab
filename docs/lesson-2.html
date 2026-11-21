@@ -121,7 +121,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
   <nav class="page-eyebrow" aria-label="Breadcrumbs"><a href="index.html">Harden a local sandbox policy</a><span aria-hidden="true">/</span><span aria-current="page">Change and verify a sandbox policy</span></nav>
   <span class="type-label">Lesson 2 of 2</span>
   <h1>Change and verify a sandbox policy</h1>
-  <p class="byline"><span class="byline__label">By</span><a href="https://www.linkedin.com/in/zerkler">David Zerkler</a><span class="byline__badge">Independent sample</span></p><ul class="resource-facts"><li>Intermediate</li><li>30 min</li><li>Tested on sbx v0.54.0</li><li>Updated Nov 17, 2026</li></ul>
+  <p class="byline"><span class="byline__label">By</span><a href="https://www.linkedin.com/in/zerkler">David Zerkler</a><span class="byline__badge">Independent sample</span></p><ul class="resource-facts"><li>Intermediate</li><li>30 min</li><li>Tested on sbx v0.54.0</li><li>Updated Nov 21, 2026</li></ul>
   <p class="lede">Apply the decision you made for Priya on a real sandbox, and confirm each change did what you intended. A policy change that nobody checks is a guess.</p>
 </header>
 
@@ -144,18 +144,23 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <p>You're at Priya's machine. Based on Lesson 1, you've decided on four changes:</p>
     <ol>
       <li>Remove the Cloud infrastructure group.</li>
-      <li>Allow <code>cdn.playwright.dev</code> again.</li>
+      <li>Allow <code>cdn.playwright.dev</code> on port 443 again.</li>
       <li>Remove the AI services group.</li>
       <li>Deny one host the team has no use for.</li>
     </ol>
   </div>
   <h3>Before you start</h3>
   <ul>
-    <li>You run every step on your own computer, in your terminal, using your real sandbox and policies. The lab changes your local policy, and the last section puts it back.</li>
+    <li>You run every step on your own computer, in your terminal, using your real sandbox and policies. The lab is written for Windows 11 and Command Prompt. The <code>sbx</code> commands are the same on macOS and Linux, but the check script at the end runs only in Command Prompt.</li>
     <li><code>sbx</code> is installed, and the Balanced preset is set with no changes.</li>
+    <li>No organization policy is enforced on your machine. Run <code>sbx policy ls</code>. If the output starts with a status line that reads <code>Governance: Managed by</code> and an organization name, local allow rules don't grant access, and the output you see won't match this lab.</li>
     <li>You have a sandbox that runs Claude Code. Ours is named <code>priya-tools</code>. Use your sandbox's name wherever you see it.</li>
     <li>Rule IDs and the kit policy ID on your machine differ from the ones shown here.</li>
   </ul>
+  <div class="fb warn"><strong>This lab changes every sandbox on your machine.</strong> <span class="why">The preset's groups are global rules, so removing one changes access for all your sandboxes, not only <code>priya-tools</code>. The last section resets your local policy, which deletes every local rule, including destinations you approved. If you've added rules or approved destinations, save the output of these two commands before you start, so you can add them back afterward:</span></div>
+  <div class="cmdrow"><pre class="cmd">sbx policy ls --wide --created-via added</pre></div>
+  <div class="cmdrow"><pre class="cmd">sbx policy ls --wide --created-via approval</pre></div>
+  <p>To limit an allow or deny rule to one sandbox, add <code>--sandbox</code> and the sandbox's name. This lab uses global rules, because the decision you made for Priya applies to her whole machine.</p>
   <p>Every step shows the real output under the command. Where a step asks for a prediction, answer before you run the command.</p>
 </section>
 <!-- END section:scenario -->
@@ -257,6 +262,19 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
       </tbody>
     </table></div>
   </div>
+  <h3>Read a command in parts</h3>
+  <p>Every <code>sbx policy</code> command has the same parts. The last part is where commands differ, and where most mistakes happen.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Part</th><th>In <code>sbx policy rm network --id default-ai-services</code></th><th>In <code>sbx policy deny network sourceforge.net</code></th></tr></thead>
+    <tbody>
+      <tr><td>The CLI</td><td><code>sbx</code></td><td><code>sbx</code></td></tr>
+      <tr><td>The command group</td><td><code>policy</code></td><td><code>policy</code></td></tr>
+      <tr><td>The action</td><td><code>rm</code></td><td><code>deny</code></td></tr>
+      <tr><td>The rule type</td><td><code>network</code></td><td><code>network</code></td></tr>
+      <tr><td>What the action works on</td><td>A flag and its value: <code>--id</code> takes a rule ID</td><td>An argument with no flag: a host</td></tr>
+    </tbody>
+  </table></div>
+  <p><code>allow</code> and <code>deny</code> take a host. <code>rm</code> takes a rule ID or a resource, each after its own flag.</p>
   <p>Whenever a step in this lesson surprises you, run the same command with <code>--help</code> before you try anything else.</p>
 </section>
 <!-- END section:s1 -->
@@ -400,7 +418,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <span class="ex-tag">Exercise 2 · Find what Priya needs</span>
     <label for="find-host">Priya's browser tests download Playwright's test browsers. Type one host from the list above that serves them.</label>
     <div class="row"><input type="text" id="find-host" size="26" placeholder="host name"><button type="button" id="find-btn">Check</button><span class="err" id="find-err" role="alert"></span></div>
-    <div id="find-fb"></div>
+    <div id="find-fb" aria-live="polite"></div>
   </div>
 </section>
 <!-- END section:s3 -->
@@ -419,7 +437,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     Governance:  Local policy only
     Context:     global
     Rule:        default-cloud-infrastructure</pre>
-    <p>The <code>Rule</code> line names the group that allows it.</p>
+    <p>The <code>Rule</code> line names the group that allows it. The <code>Governance</code> line reads <code>Local policy only</code> because no organization policy is enforced on this machine. When one is, only the organization's allow rules grant access. Local and kit allow rules stop counting, and local deny rules still apply.</p>
   </div>
 
   <div class="step">
@@ -434,7 +452,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
   <div class="step" data-options="Allowed, by the kit policy|Denied, with no matching allow rule|Denied, by a deny rule" data-answer="1" data-why="No rule allows this destination now, so the fallback decides. You added no deny rule. You took an allow rule away.">
     <span class="stepno">Step 9 · Predict, then run</span>
     <div class="cmdrow"><pre class="cmd">sbx policy check network s3.amazonaws.com:443</pre></div>
-    <div class="predict"><p>What will the check report now?</p></div>
+    <div class="predict"><p>What will the check report now, and what decides it?</p></div>
     <div class="reveal" hidden>
       <pre class="cli">    Denied:      s3.amazonaws.com:443
     Governance:  Local policy only
@@ -457,15 +475,20 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 
   <div class="step">
     <span class="stepno">Step 11 · Run</span>
-    <p>Allow that one host again, then check it.</p>
-    <div class="cmdrow"><pre class="cmd">sbx policy allow network cdn.playwright.dev</pre></div>
-    <pre class="cli">  Added rule 2d5f22e6-569f-4b9d-9bb5-9818d95d6ce7 to policy local (scope: global): cdn.playwright.dev [tcp]</pre>
+    <p>Allow that one destination again, with its port, then check it. The group you removed allowed this host on port 443 only, so name the same port. A rule with no port would cover every port on the host, which is more than the preset allowed.</p>
+    <div class="cmdrow"><pre class="cmd">sbx policy allow network cdn.playwright.dev:443</pre></div>
+    <pre class="cli">  Added rule 75da4047-0c79-40fd-9f71-9e502209a02b to policy local (scope: global): cdn.playwright.dev:443 [tcp]</pre>
     <div class="cmdrow"><pre class="cmd">sbx policy check network cdn.playwright.dev:443</pre></div>
     <pre class="cli">    Allowed:     cdn.playwright.dev:443
     Governance:  Local policy only
     Context:     global
-    Rule:        2d5f22e6-569f-4b9d-9bb5-9818d95d6ce7</pre>
-    <p>The <code>Rule</code> line now shows the ID of the rule you added. You named no port, so the rule covers every port on that host.</p>
+    Rule:        75da4047-0c79-40fd-9f71-9e502209a02b</pre>
+    <p>The <code>Rule</code> line now shows the ID of the rule you added. Check another port on the same host to confirm the rule stops at 443:</p>
+    <div class="cmdrow"><pre class="cmd">sbx policy check network cdn.playwright.dev:80</pre></div>
+    <pre class="cli">    Denied:      cdn.playwright.dev:80
+    Governance:  Local policy only
+    Context:     global
+    Reason:      no matching allow rule (default deny)</pre>
   </div>
 
   <div class="step">
@@ -481,7 +504,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <span class="stepno">Step 13 · Predict, then run both</span>
     <div class="cmdrow"><pre class="cmd">sbx policy check network api.anthropic.com:443</pre></div>
     <div class="cmdrow"><pre class="cmd">sbx policy check network --sandbox priya-tools api.anthropic.com:443</pre></div>
-    <div class="predict"><p>Claude Code needs this host. What will the two checks report?</p></div>
+    <div class="predict"><p>Claude Code needs this host. What will the two checks report, and which policy decides each?</p></div>
     <div class="reveal" hidden>
       <pre class="cli">    Denied:      api.anthropic.com:443
     Governance:  Local policy only
@@ -500,7 +523,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <div class="cmdrow"><pre class="cmd">sbx policy deny network sourceforge.net</pre></div>
     <pre class="cli">  Added rule 53ec821c-272f-45ab-b2af-c00732e4adf2 to policy local (scope: global): sourceforge.net [tcp,udp]</pre>
     <div class="cmdrow"><pre class="cmd">sbx policy check network sourceforge.net:443</pre></div>
-    <div class="predict"><p>An allow rule and a deny rule now both match. What will the check report?</p></div>
+    <div class="predict"><p>An allow rule and a deny rule now both match. What will the check report, and which rule decides?</p></div>
     <div class="reveal" hidden>
       <pre class="cli">    Denied:      sourceforge.net:443
     Governance:  Local policy only
@@ -558,10 +581,10 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
   <div class="step" data-options="A second rule is added|An error, because the rule exists|A message that the host is already covered, and no change" data-answer="2" data-why="The CLI saved nothing, and it exited without an error. If you'd been expecting a new rule, only reading the message would tell you.">
     <span class="stepno">Step 15 · Predict, then run</span>
     <p>Run the allow command from step 11 a second time.</p>
-    <div class="cmdrow"><pre class="cmd">sbx policy allow network cdn.playwright.dev</pre></div>
+    <div class="cmdrow"><pre class="cmd">sbx policy allow network cdn.playwright.dev:443</pre></div>
     <div class="predict"><p>What will the CLI do?</p></div>
     <div class="reveal" hidden>
-      <pre class="cli">  Already covered in policy local (scope: global): cdn.playwright.dev [tcp] (by rule "2d5f22e6-569f-4b9d-9bb5-9818d95d6ce7")</pre>
+      <pre class="cli">  Already covered in policy local (scope: global): cdn.playwright.dev:443 [tcp] (by rule "75da4047-0c79-40fd-9f71-9e502209a02b")</pre>
     </div>
   </div>
 </section>
@@ -583,7 +606,8 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 
   <div class="ex">
     <span class="ex-tag">Assessment · Run the check script</span>
-    <p>Save this as <code>check-policy.cmd</code>, then run it from Command Prompt.</p>
+    <p>Save this as <code>check-policy.cmd</code>. Open Command Prompt in the folder where you saved it, then type <code>check-policy.cmd</code> and press Enter. Don't double-click the file: the window closes before you can read the results.</p>
+    <p>Each line asks whether the policy allows egress to one destination: one the team needs, or one nobody needs. The script tests the policy's decision. It doesn't send real traffic.</p>
     <div class="cmdrow"><pre class="cmd" id="script">@echo off
 setlocal
 set FAILED=0
@@ -630,17 +654,13 @@ All checks passed.</pre>
     <p>If a line reads <code>FAIL</code>, run that check by hand and read its <code>Rule</code> or <code>Reason</code> line.</p>
   </div>
 
-  <div class="ex">
-    <span class="ex-tag">Stretch · Optional</span>
-    <p>Make the script run every morning and tell you when a line changes.</p>
-  </div>
 </section>
 <!-- END section:assess -->
 
 <!-- BEGIN section:cleanup -->
 <section id="cleanup">
   <h2>Put the machine back</h2>
-  <p>If this was a practice machine, reset the local policy. The reset stops running sandboxes and deletes every local rule, then asks you to choose a preset.</p>
+  <p>Reset the local policy to return to the preset you started with. The reset stops running sandboxes and deletes every local rule, including destinations you approved, then asks you to choose a preset. If you saved rules before you started, add them back after the reset.</p>
   <div class="step">
     <span class="stepno">Step 17 · Run</span>
     <div class="cmdrow"><pre class="cmd">sbx policy reset</pre></div>
@@ -660,7 +680,7 @@ All checks passed.</pre>
     <thead><tr><th>You see</th><th>What it means</th></tr></thead>
     <tbody>
       <tr><td><code>Already covered in policy local</code></td><td>The rule exists. Nothing changed.</td></tr>
-      <tr><td>A different count in <code>sbx policy ls</code> at step 3</td><td>The preset has been changed before. Reset it, then start again.</td></tr>
+      <tr><td>A different count in <code>sbx policy ls</code> at step 3</td><td>Your local policy has been changed before. Save your rules with <code>sbx policy ls --wide --created-via added</code> and <code>sbx policy ls --wide --created-via approval</code>, then reset and start again.</td></tr>
       <tr><td>A <code>Rule</code> line with an ID you don't recognize</td><td>A rule someone added decides this destination. Run <code>sbx policy ls --wide --created-via added</code> to list added rules.</td></tr>
     </tbody>
   </table></div>
@@ -679,7 +699,7 @@ All checks passed.</pre>
           <tr><td>Check script</td><td>Verify</td><td><code>check</code></td></tr>
         </tbody>
       </table></div>
-      <p class="meta">Every output block is copied from a real run unless a draft note says otherwise. The lab runs in the learner's own terminal. The learning plan this course belongs to installs what the lab needs. Exercise 3 is a mistake the author made while learning the tool.</p>
+      <p class="meta">Every output block is copied from a real run. The lab runs in the learner's own terminal. The learning plan this course belongs to installs what the lab needs. Exercise 3 is a mistake the author made while learning the tool.</p>
     </div>
   </details>
 </section>
@@ -695,7 +715,9 @@ All checks passed.</pre>
     <li><a href="https://docs.docker.com/learn/content/customize-your-sandbox-with-kits/">Customize your sandbox with kits &#8599;</a></li>
     <li><a href="https://docs.docker.com/learn/content/build-your-first-sandbox-kit/">Build your first Docker Sandbox kit &#8599;</a></li>
     <li><a href="https://docs.docker.com/learn/content/connect-to-services-without-exposing-credentials/">Connect to services without exposing credentials &#8599;</a></li>
-    <li><a href="https://docs.docker.com/ai/sandboxes/governance/access-controls/local/">Local network policy (reference) &#8599;</a></li>
+    <li><a href="https://docs.docker.com/ai/governance/local/">Local policy (reference) &#8599;</a></li>
+    <li><a href="https://docs.docker.com/ai/governance/local/try-it-out/">Try out local policy &#8599;</a></li>
+    <li><a href="https://docs.docker.com/ai/governance/local/approvals/">Respond to approval requests &#8599;</a></li>
     <li><a href="https://docs.docker.com/reference/cli/sbx/">sbx CLI reference &#8599;</a></li>
   </ul>
 </aside>
@@ -723,8 +745,8 @@ All checks passed.</pre>
     return d;
   }
   var uid = 0;
-  function radios(host, options) {
-    var name = 'q' + (uid++), wrap = el('div', { cls: 'opts' });
+  function radios(host, options, label) {
+    var name = 'q' + (uid++), wrap = el('div', { cls: 'opts', role: 'radiogroup', 'aria-label': label || 'Answer choices' });
     options.forEach(function (o, i) {
       var id = name + '-' + i;
       wrap.appendChild(el('label', { 'for': id }, [el('input', { type: 'radio', name: name, id: id, value: String(i) }), el('span', { text: o })]));
@@ -749,8 +771,9 @@ All checks passed.</pre>
   document.querySelectorAll('.step[data-options]').forEach(function (step) {
     var box = step.querySelector('.predict'), reveal = step.querySelector('.reveal');
     var answer = Number(step.getAttribute('data-answer'));
-    var get = radios(box, step.getAttribute('data-options').split('|'));
-    var err = el('span', { cls: 'err', role: 'alert' }), out = el('div');
+    var prompt = box.querySelector('p');
+    var get = radios(box, step.getAttribute('data-options').split('|'), prompt ? prompt.textContent : null);
+    var err = el('span', { cls: 'err', role: 'alert' }), out = el('div', { 'aria-live': 'polite' });
     var btn = el('button', { type: 'button', text: 'Check prediction' });
     box.appendChild(el('div', { cls: 'row' }, [btn, err]));
     box.appendChild(out);
@@ -766,8 +789,9 @@ All checks passed.</pre>
   /* Multiple-choice questions */
   document.querySelectorAll('.q').forEach(function (q) {
     var answer = Number(q.getAttribute('data-answer'));
-    var get = radios(q, q.getAttribute('data-options').split('|'));
-    var err = el('span', { cls: 'err', role: 'alert' }), out = el('div', { style: 'margin-top:0.6rem;' });
+    var prev = q.previousElementSibling;
+    var get = radios(q, q.getAttribute('data-options').split('|'), prev && prev.tagName === 'P' ? prev.textContent : null);
+    var err = el('span', { cls: 'err', role: 'alert' }), out = el('div', { style: 'margin-top:0.6rem;', 'aria-live': 'polite' });
     var btn = el('button', { type: 'button', text: 'Check answer' });
     q.appendChild(el('div', { cls: 'row', style: 'margin-top:0.8rem;' }, [btn, err]));
     q.appendChild(out);
@@ -786,7 +810,7 @@ All checks passed.</pre>
     var v = fh.value.trim().toLowerCase().replace(/:443$/, ''); clear(ff);
     if (!v) { fe.textContent = 'Type a host name from the list first.'; return; }
     if (v === 'cdn.playwright.dev' || v === 'playwright.azureedge.net') {
-      ff.appendChild(fb('ok', 'Found it.', 'Two hosts in this group serve Playwright downloads: cdn.playwright.dev and playwright.azureedge.net. The plan allows the first. If a browser download still fails after step 11, check the second and allow it too.'));
+      ff.appendChild(fb('ok', 'Found it.', 'Two hosts in this group serve Playwright downloads: cdn.playwright.dev and playwright.azureedge.net. The plan allows the first, on port 443. If a browser download still fails after step 11, check the second and allow it on port 443 too.'));
     } else {
       ff.appendChild(fb('no', 'Not that one.', 'Look for the tool\'s name in the list. There are two matching hosts.'));
     }

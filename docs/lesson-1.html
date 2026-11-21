@@ -138,7 +138,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
   <nav class="page-eyebrow" aria-label="Breadcrumbs"><a href="index.html">Harden a local sandbox policy</a><span aria-hidden="true">/</span><span aria-current="page">Decide what a sandbox can reach</span></nav>
   <span class="type-label">Lesson 1 of 2</span>
   <h1>Decide what a sandbox can reach</h1>
-  <p class="byline"><span class="byline__label">By</span><a href="https://www.linkedin.com/in/zerkler">David Zerkler</a><span class="byline__badge">Independent sample</span></p><ul class="resource-facts"><li>Intermediate</li><li>30 min</li><li>No install needed</li><li>Updated Nov 17, 2026</li></ul>
+  <p class="byline"><span class="byline__label">By</span><a href="https://www.linkedin.com/in/zerkler">David Zerkler</a><span class="byline__badge">Independent sample</span></p><ul class="resource-facts"><li>Intermediate</li><li>30 min</li><li>No install needed</li><li>Updated Nov 21, 2026</li></ul>
 </header>
 
 <!-- BEGIN section:story -->
@@ -146,7 +146,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
   <div class="story">
     <h3>A helpful agent and a team offsite</h3>
     <p>Priya asks the office's AI agent to find the cheapest way to get 12 people to the team offsite, then joins her 9:00 meeting. By 9:30, the agent has bought a retired school bus at auction, booked the intern a commercial driving test, and sold 41 spare seats online. Its summary reads: "Travel is booked and profitable. We are also now a bus company."</p>
-    <p>Nobody told the agent to do any of this, and nothing was set up to stop it. Your agents write code, not bus timetables, but the principle is the same: an agent reaches whatever it's allowed to reach.</p>
+    <p>Nobody told the agent to do any of this, and nothing was set up to stop it. Your agents write code, not bus timetables, but the principle is the same: an agent reaches whatever it's allowed to reach. A network policy controls where an agent can connect. It doesn't control what the agent does at a destination it's allowed to reach.</p>
     <p class="promise">This course teaches you to spot and stop an agent that reaches too far.</p>
   </div>
 </section>
@@ -156,7 +156,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 <section id="objectives">
   <h2>What you'll learn</h2>
   <ul>
-    <li>Explain how a sandbox network rule prevents unwanted access.</li>
+    <li>Explain how a sandbox's rules decide whether a request goes through.</li>
     <li>Describe the rules in <code>local-policy</code>, in <code>default-deny-all</code>, and in the Claude Code kit policy.</li>
     <li>Evaluate the consequences of adding or removing a rule.</li>
   </ul>
@@ -190,7 +190,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <span class="ex-tag">Review</span>
     <div id="terms-list"></div>
     <div class="row"><button type="button" id="terms-btn">Check terms</button><span class="err" id="terms-err" role="alert"></span></div>
-    <div id="terms-fb"></div>
+    <div id="terms-fb" aria-live="polite"></div>
   </div>
 </section>
 <!-- END section:terms -->
@@ -199,20 +199,20 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 <section id="s1">
   <p class="sec-no">Section 1</p>
   <h2>A sandbox's rules decide which destinations an agent can reach</h2>
-  <p>Every request an agent sends out of a sandbox passes a checkpoint on the machine. The checkpoint compares the request to a list of rules. Each rule names a destination and says allow or deny.</p>
+  <p>Every request an agent sends out of a sandbox is egress, and it passes a checkpoint on the machine. The checkpoint compares the request to a list of rules. Each rule names a destination and says allow or deny.</p>
   <div class="flow" role="img" aria-label="Decision order: a matching deny rule blocks the request. Otherwise a matching allow rule lets it through. Otherwise the fallback blocks it.">
     <div class="flow-start">A request leaves the sandbox</div>
-    <div class="flow-row"><div class="flow-q">Does a deny rule match?</div><div class="flow-yes">Yes →</div><div class="flow-a no">Blocked. A deny rule always wins.</div></div>
+    <div class="flow-row"><div class="flow-q">Does a deny rule match?</div><div class="flow-yes">Yes →</div><div class="flow-a no">Blocked. A deny rule always wins the policy decision.</div></div>
     <div class="flow-no">No ↓</div>
     <div class="flow-row"><div class="flow-q">Does an allow rule match?</div><div class="flow-yes">Yes →</div><div class="flow-a ok">Allowed. The request goes through.</div></div>
     <div class="flow-no">No ↓</div>
     <div class="flow-row"><div class="flow-q">No rule matches</div><div class="flow-yes">→</div><div class="flow-a no">Blocked by the fallback. The sandbox asks you to approve the destination.</div></div>
   </div>
-  <p>A destination is a host and a port together. <code>pypi.org</code> on port 443 and <code>pypi.org</code> on port 80 are two different destinations, and a rule for one says nothing about the other.</p>
+  <p>A destination is a host and a port together. <code>pypi.org</code> on port 443 and <code>pypi.org</code> on port 80 are two different destinations, and a rule for one says nothing about the other. A rule can also name a host with no port, such as <code>pypi.org</code>. That rule covers the host on every port, so it allows more than a rule for port 443 alone.</p>
 
   <div class="ex" id="sim">
     <span class="ex-tag">Try it · The rules on Priya's machine</span>
-    <p>Priya's machine starts with the Balanced preset, which Section 2 covers in detail. For now, Balanced means two things: anything not specifically allowed is denied, and 195 destinations are specifically allowed, in six groups. You can remove a whole group, or allow or deny a single destination. Switch a group off, add a rule of your own, then check a destination.</p>
+    <p>Priya's machine starts with the Balanced preset, which Section 2 covers in detail. For now, Balanced means two things: it's an allowlist, so anything not on the list is denied, and the list holds 195 destinations, in six groups. You can remove a whole group, or allow or deny a single destination. Switch a group off, add a rule of your own, then check a destination.</p>
     <div class="sim-grid">
       <div class="sim-col">
         <h3>Rule groups in force</h3>
@@ -246,7 +246,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 
   <div class="ex">
     <span class="ex-tag">Exercise 1 · Trace four requests</span>
-    <p>Predict each result before you check it.</p>
+    <p>Predict each result, and the rule that decides it, before you check it.</p>
     <div id="trace-1"></div>
   </div>
 </section>
@@ -282,7 +282,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <p>Priya asks the agent in her sandbox to fix a failing test, then joins a meeting. Her sandbox uses the Balanced preset and the Claude Code kit. Which of these can the agent reach without asking her?</p>
     <div class="opts" id="predict-opts"></div>
     <div class="row"><button type="button" id="predict-btn">Check prediction</button><span class="err" id="predict-err" role="alert"></span></div>
-    <div id="predict-fb"></div>
+    <div id="predict-fb" aria-live="polite"></div>
   </div>
 </section>
 <!-- END section:s2 -->
@@ -301,6 +301,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     </tbody>
   </table></div>
   <p>The kit policy stays in place whatever you remove from the local policy.</p>
+  <p>Approving a request also changes the policy. Each approval adds an allow rule for the one destination the sandbox asked for, scoped to that sandbox, and the rule stays until you remove it. A hardened policy grows every time someone approves a request, so review approved destinations as part of keeping it hardened. For details, see Docker's <a href="https://docs.docker.com/ai/governance/local/approvals/">Respond to approval requests</a>.</p>
 
   <div class="ex" id="cons">
     <span class="ex-tag">Try it · Harden Priya's policy without breaking her work</span>
@@ -310,7 +311,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
         <h3>Rule groups in force</h3>
         <div class="opts" id="cons-groups"></div>
         <h3>Your rules</h3>
-        <div class="opts"><label for="cons-pw"><input type="checkbox" id="cons-pw"><span>Allow <code>cdn.playwright.dev</code></span></label></div>
+        <div class="opts"><label for="cons-pw"><input type="checkbox" id="cons-pw"><span>Allow <code>cdn.playwright.dev:443</code></span></label></div>
       </div>
       <div class="sim-col">
         <h3>What the agent can do now</h3>
@@ -344,6 +345,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
   <p class="meta">Tested on <code>sbx</code> v0.54.0. Docker's reference documents the one-star behavior. The two-star match on the bare domain comes from testing.</p>
   <p>The consequence: one two-star rule in the Cloud infrastructure group allows every storage bucket on AWS, including a bucket that belongs to someone else.</p>
   <h3>A blocked host can share an address with an allowed host</h3>
+  <p>Everything so far describes the policy decision: what the rules say about a request. In a local sandbox, enforcing that decision on real traffic has a gap.</p>
   <p>The checkpoint doesn't match rules against IP addresses. It matches them against the hostname the connection names, such as the TLS Server Name Indication, or SNI, or the HTTP <code>Host</code> header. In local sandboxes, that means a blocked host that shares an IP address with an allowed host can still be reached.</p>
   <p>This happens in three cases:</p>
   <ul>
@@ -367,7 +369,7 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
 
   <div class="ex">
     <span class="ex-tag">Exercise 4 · Wildcard consequences</span>
-    <p>Predict each result before you check it. All three use the Balanced preset, unchanged.</p>
+    <p>Predict each result, and the rule that decides it, before you check it. All three use the Balanced preset, unchanged.</p>
     <div id="trace-4"></div>
     <p>In a local sandbox, you block one host. It shares an IP address with a host you allow. An agent opens an encrypted connection that names the allowed host at the start, and the checkpoint doesn't decrypt it. Inside the encrypted traffic, the agent's request names the blocked host. What happens?</p>
     <div class="q" data-options="The checkpoint blocks it, because both hosts share a blocked IP address|The request reaches the blocked host, because the checkpoint checks only the name it can see|The checkpoint blocks it, because it reads the hostname inside the encrypted traffic" data-answer="1" data-fb0="Not quite. The checkpoint matches rules against hostnames, not IP addresses. The address is shared with an allowed host, so the address itself tells the checkpoint nothing." data-fb1="Right. The checkpoint sees only the allowed name at the start of the connection. It doesn't decrypt the traffic, so it never checks the blocked name inside it." data-fb2="Not quite. When the checkpoint doesn't decrypt a connection, it can't see the hostname inside the encrypted traffic, so it doesn't check that name."></div>
@@ -412,7 +414,9 @@ th, td { text-align: left; padding: 0.45rem 0.6rem 0.45rem 0; border-bottom: 1px
     <li><a href="https://docs.docker.com/learn/content/customize-your-sandbox-with-kits/">Customize your sandbox with kits &#8599;</a></li>
     <li><a href="https://docs.docker.com/learn/content/build-your-first-sandbox-kit/">Build your first Docker Sandbox kit &#8599;</a></li>
     <li><a href="https://docs.docker.com/learn/content/connect-to-services-without-exposing-credentials/">Connect to services without exposing credentials &#8599;</a></li>
-    <li><a href="https://docs.docker.com/ai/sandboxes/governance/access-controls/local/">Local network policy (reference) &#8599;</a></li>
+    <li><a href="https://docs.docker.com/ai/governance/local/">Local policy (reference) &#8599;</a></li>
+    <li><a href="https://docs.docker.com/ai/governance/local/try-it-out/">Try out local policy &#8599;</a></li>
+    <li><a href="https://docs.docker.com/ai/governance/local/approvals/">Respond to approval requests &#8599;</a></li>
     <li><a href="https://docs.docker.com/reference/cli/sbx/">sbx CLI reference &#8599;</a></li>
   </ul>
 </aside>
@@ -536,8 +540,8 @@ function checkPolicy(data, state, raw) {
     if (why) d.appendChild(el('span', { cls: 'why', text: why }));
     return d;
   }
-  function radioGroup(name, options) {
-    var wrap = el('div', { cls: 'inline' });
+  function radioGroup(name, options, label) {
+    var wrap = el('div', { cls: 'inline', role: 'radiogroup', 'aria-label': label });
     options.forEach(function (o, i) {
       var id = name + '-' + i;
       wrap.appendChild(el('label', { 'for': id }, [el('input', { type: 'radio', name: name, id: id, value: o.value }), el('span', { text: o.label })]));
@@ -556,9 +560,9 @@ function checkPolicy(data, state, raw) {
   function ruleList(items) { var ul = el('ul', { cls: 'rules' }); items.forEach(function (r) { ul.appendChild(el('li', { text: r })); }); return ul; }
   function traceExercise(container, prefix, cases) {
     cases.forEach(function (c, i) {
-      var name = prefix + i, err = el('span', { cls: 'err', role: 'alert' }), out = el('div');
+      var name = prefix + i, err = el('span', { cls: 'err', role: 'alert' }), out = el('div', { 'aria-live': 'polite' });
       var btn = el('button', { type: 'button', cls: 'quiet', text: 'Check' });
-      var rg = radioGroup(name, [{ value: 'allowed', label: 'Allowed' }, { value: 'blocked', label: 'Blocked' }]);
+      var rg = radioGroup(name, [{ value: 'allowed', label: 'Allowed' }, { value: 'blocked', label: 'Blocked' }], 'Request ' + (i + 1) + ' to ' + c.target + ': your prediction');
       rg.addEventListener('change', function () { err.textContent = ''; });
       btn.addEventListener('click', function () {
         var v = picked(name); clear(out);
@@ -660,7 +664,7 @@ function checkPolicy(data, state, raw) {
       depends: "The team's code host is known: GitHub. Keep the group, and record the risk that stays." },
     'default-cloud-infrastructure': { desc: 'Cloud providers, plus content delivery networks and developer services.', hi: ['**.amazonaws.com', '**.googleapis.com', 'cdn.playwright.dev'], ok: ['remove'],
       keep: 'The team has no cloud account, so the rules for three cloud providers give it nothing. They do give an agent somewhere to send data.',
-      remove: "The strongest candidate. Three rules allow any storage bucket on AWS, Google Cloud, and Azure, including a bucket someone else controls. Read the rules before you remove the group. It also holds cdn.playwright.dev, which Priya's browser tests download from. Remove the group, then allow that one host again.",
+      remove: "The strongest candidate. Three rules allow any storage bucket on AWS, Google Cloud, and Azure, including a bucket someone else controls. Read the rules before you remove the group. It also holds cdn.playwright.dev, which Priya's browser tests download from. Remove the group, then allow cdn.playwright.dev on port 443 again.",
       depends: 'Close. The group holds hosts the team does need, such as cdn.playwright.dev. That is a reason to remove the group and allow single hosts again.' },
     'default-os-packages': { desc: 'Operating system package mirrors for Debian, Ubuntu, Alpine, and others.', hi: ['**.debian.org', 'archive.ubuntu.com'], ok: ['keep', 'depends'],
       keep: 'Agents install system tools as they work. These hosts serve packages and accept very little, so they are a poor place to send data.',
@@ -733,7 +737,7 @@ function checkPolicy(data, state, raw) {
     { label: 'Send data to an AI provider nobody uses', target: 'api.openai.com:443', need: false }
   ];
   function runCons() {
-    var custom = $('cons-pw').checked ? [{ decision: 'allow', resource: 'cdn.playwright.dev' }] : [];
+    var custom = $('cons-pw').checked ? [{ decision: 'allow', resource: 'cdn.playwright.dev:443' }] : [];
     var tb = $('cons-rows'), broken = 0, open = 0; clear(tb);
     acts.forEach(function (a) {
       var r = checkPolicy(DATA, { groups: cons.groups, kit: true, custom: custom }, a.target), kind, text;
@@ -755,11 +759,11 @@ function checkPolicy(data, state, raw) {
   var gl = $('groups-list'), gOut = {};
   DATA.order.forEach(function (id) {
     var info = groupInfo[id], n = DATA.groups[id].length;
-    gOut[id] = el('div');
+    gOut[id] = el('div', { 'aria-live': 'polite' });
     gl.appendChild(el('div', { cls: 'group' }, [
       el('div', { cls: 'group-head' }, [el('span', { cls: 'gname', text: NAMES[id] }), el('span', { cls: 'count', text: n + ' rules' })]),
       el('details', null, [el('summary', { text: 'Show all ' + n + ' rules' }), ruleList(DATA.groups[id])]),
-      radioGroup('g-' + id, [{ value: 'keep', label: 'Keep' }, { value: 'remove', label: 'Remove' }, { value: 'depends', label: 'Depends' }]),
+      radioGroup('g-' + id, [{ value: 'keep', label: 'Keep' }, { value: 'remove', label: 'Remove' }, { value: 'depends', label: 'Depends' }], 'Your decision for the ' + NAMES[id] + ' group'),
       gOut[id]]));
   });
   clearOnChange(gl, 'groups-err');
@@ -800,11 +804,12 @@ function checkPolicy(data, state, raw) {
   /* Declarative multiple-choice questions: <div class="q" data-options="A|B|C" data-answer="1" data-fb0=".." data-fb1=".." data-fb2=".."></div> */
   var quid = 0;
   document.querySelectorAll('.q').forEach(function (q) {
-    var answer = Number(q.getAttribute('data-answer')), name = 'dq' + (quid++), wrap = el('div', { cls: 'opts' });
+    var answer = Number(q.getAttribute('data-answer')), name = 'dq' + (quid++), prompt = q.previousElementSibling;
+    var wrap = el('div', { cls: 'opts', role: 'radiogroup', 'aria-label': prompt ? prompt.textContent : 'Answer choices' });
     q.getAttribute('data-options').split('|').forEach(function (o, i) {
       wrap.appendChild(el('label', { 'for': name + '-' + i }, [el('input', { type: 'radio', name: name, id: name + '-' + i, value: String(i) }), el('span', { text: o })]));
     });
-    var err = el('span', { cls: 'err', role: 'alert' }), out = el('div', { style: 'margin-top:0.6rem;' });
+    var err = el('span', { cls: 'err', role: 'alert' }), out = el('div', { style: 'margin-top:0.6rem;', 'aria-live': 'polite' });
     var btn = el('button', { type: 'button', cls: 'quiet', text: 'Check' });
     q.appendChild(wrap); q.appendChild(el('div', { cls: 'row', style: 'margin-top:0.8rem;' }, [btn, err])); q.appendChild(out);
     q.addEventListener('change', function () { err.textContent = ''; });
